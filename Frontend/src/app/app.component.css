@@ -1,0 +1,99 @@
+/* Variables CSS para fácil mantenimiento */
+:root {
+  --font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+  --font-size: 14px;
+  --font-size-heading: 16px;
+  --background-color-sidebar: #eaf9ff;
+  --border-color: #d3e2e8;
+  --text-color: #333;
+  --margin-default: 1.5em;
+  --padding-default: 0;
+  --padding-sidebar: 2em;
+  --padding-main: 3em;
+  --max-width-calendar: 2100px;
+}
+
+/* General Styles */
+h2 {
+  margin: 0;
+  font-size: var(--font-size-heading);
+  color: var(--text-color);
+}
+
+ul {
+  margin: 0;
+  padding: 0 0 0 1.5em;
+}
+
+li {
+  margin: var(--margin-default) 0;
+  padding: var(--padding-default);
+}
+
+b { 
+  /* Used for event dates/times */
+  margin-right: 3px;
+}
+
+/* Application Layout */
+.demo-app {
+  display: flex;
+  min-height: 100%;
+  font-family: var(--font-family);
+  font-size: var(--font-size);
+}
+
+.demo-app-sidebar {
+  width: 300px;
+  line-height: 1.5;
+  background: var(--background-color-sidebar);
+  border-right: 1px solid var(--border-color);
+}
+
+.demo-app-sidebar-section {
+  padding: var(--padding-sidebar);
+}
+
+.demo-app-main {
+  flex-grow: 1;
+  padding: var(--padding-main);
+}
+
+/* Calendar Component */
+.fc { 
+  /* The calendar root */
+  max-width: var(--max-width-calendar);
+  margin: 0 auto;
+}
+
+/* Styles for Table */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto; /* Allow horizontal scrolling if needed */
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th, .table td {
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.table thead th {
+  background-color: var(--background-color-sidebar);
+  color: var(--text-color);
+}
+
+.table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.table-bordered {
+  border: 1px solid var(--border-color);
+}
+:host ::ng-deep .mat-datepicker-content {
+  z-index: 1050 !important; 
+}

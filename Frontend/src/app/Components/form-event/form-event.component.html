@@ -1,0 +1,165 @@
+<form [formGroup]="form" cForm cRow class="needs-validation" ngNativeValidate
+    (ngSubmit)="onSubmit()">
+
+    <!-- Hidden Inputs -->
+    <input cFormInput id="numero" [type]="'hidden'" formControlName="numero">
+    <input cFormInput id="fecha_creacion_hidden" [type]="'hidden'"
+        formControlName="fechaCreacionHidden">
+
+    <!-- Empresa Selection -->
+    <h6 cCardSubtitle class="mb-2 text-medium-emphasis">Seleccione la
+        empresa</h6>
+
+    <!-- Checkbox Services -->
+    <c-col [xs]="6">
+        <c-form-check class="mb-3">
+            <input cFormCheckInput id="check_ser" formControlName="checkSer"
+                type="checkbox">
+            <label cFormCheckLabel for="check_ser">Services</label>
+        </c-form-check>
+        <c-form-feedback
+            *ngIf="form.get('checkSer')?.invalid && form.get('checkSer')?.touched">
+            Seleccione una empresa.
+        </c-form-feedback>
+    </c-col>
+
+    <!-- Checkbox Privada -->
+    <c-col [xs]="6">
+        <c-form-check class="mb-3">
+            <input cFormCheckInput id="check_priv" formControlName="checkPriv"
+                type="checkbox">
+            <label cFormCheckLabel for="check_priv">Privada</label>
+        </c-form-check>
+        <c-form-feedback
+            *ngIf="form.get('checkPriv')?.invalid && form.get('checkPriv')?.touched">
+            Seleccione una empresa.
+        </c-form-feedback>
+    </c-col>
+
+    <!-- Diarios Privada -->
+    <c-col [md]="6" *ngIf="showPrivadaSelect">
+        <label cLabel for="diario_privada">Diarios Privada</label>
+        <select cSelect id="diario_privada" formControlName="diarioPrivada">
+            <option disabled>Seleccione un diario</option>
+            <option value="ANT">ANTICIPOS</option>
+            <option value="BNK0">BANCOLOMBIA corriente COP 1534</option>
+            <option value="BNK1">BANCO POPULAR corriente COP 2781</option>
+            <option value="BNK2">BBVA COLOMBIA corriente COP 2272</option>
+            <option value="BNK3">BANCOLOMBIA t. credito COP 4430</option>
+            <option value="BNK4">BBVA COLOMBIA corriente COP 2272</option>
+            <option value="BNK5">BANCO CAJA SOCIAL corriente COP 7765</option>
+            <option value="INTER">INTERCOMPAÑIAS</option>
+            <option value="JEE">JEEVES TC</option>
+            <option value="NO">NÓMINA</option>
+            <option value="OF">OBLIGACIONES FINANCIERAS</option>
+            <option value="DSD">DOCUMENTO SOPORTE DIAN</option>
+            <option value="FC">FACTURA DE COMPRA</option>
+            <option value="NCP">NOTA CRÉDITO PROVEEDORES</option>
+            <option value="FV">FACTURA DE VENTA</option>
+            <option value="NCC">NOTA CRÉDITO CLIENTES</option>
+        </select>
+        <c-form-feedback
+            *ngIf="form.get('diarioPrivada')?.invalid && form.get('diarioPrivada')?.touched">
+            Por favor seleccione un diario.
+        </c-form-feedback>
+    </c-col>
+
+    <c-col [md]="6" *ngIf="showServicesSelect">
+        <label cLabel for="diario_services">Diarios Services</label>
+        <select cSelect id="diario_services" formControlName="diarioServices">
+            <option disabled>Seleccione un diario</option>
+            <option value="ANT">ANTICIPOS</option>
+            <option value="BNK0">BANCOLOMBIA corriente COP 1541</option>
+            <option value="BNK1">BANCO CAJA SOCIAL corriente COP 7828</option>
+            <option value="BNK2">BANCOLOMBIA t. credito COP 4428</option>
+            <option value="JEE">JEEVES TC</option>
+            <option value="FC">FACTURA DE COMPRA</option>
+            <option value="INTER">INTERCOMPAÑIAS</option>
+            <option value="NC">NOTA DE CONTABILIDAD</option>
+            <option value="NO">NÓMINA</option>
+            <option value="FV">FACTURA DE VENTA</option>
+            <option value="DSD">DOCUMENTO SOPORTE DIAN</option>
+            <option value="NCC">NOTA CRÉDITO CLIENTES</option>
+            <option value="NCP">NOTA CRÉDITO PROVEEDORES</option>
+            <option value="OBL">OBLIGACIONES FINANCIERAS</option>
+        </select>
+        <c-form-feedback
+            *ngIf="form.get('diarioServices')?.invalid && form.get('diarioServices')?.touched">
+            Por favor seleccione un diario.
+        </c-form-feedback>
+    </c-col>
+
+    <c-col [md]="6">
+        <label cLabel for="tercero">Tercero</label>
+        <select cSelect id="tercero" formControlName="tercero">
+            <option disabled>Seleccione un diario</option>
+            <option value="ANT">ANTICIPOS</option>
+            <option value="BNK0">BANCOLOMBIA corriente COP 1541</option>
+            <option value="BNK1">BANCO CAJA SOCIAL corriente COP 7828</option>
+            <option value="BNK2">BANCOLOMBIA t. credito COP 4428</option>
+            <option value="JEE">JEEVES TC</option>
+            <option value="FC">FACTURA DE COMPRA</option>
+            <option value="INTER">INTERCOMPAÑIAS</option>
+            <option value="NC">NOTA DE CONTABILIDAD</option>
+            <option value="NO">NÓMINA</option>
+            <option value="FV">FACTURA DE VENTA</option>
+            <option value="DSD">DOCUMENTO SOPORTE DIAN</option>
+            <option value="NCC">NOTA CRÉDITO CLIENTES</option>
+            <option value="NCP">NOTA CRÉDITO PROVEEDORES</option>
+            <option value="OBL">OBLIGACIONES FINANCIERAS</option>
+        </select>
+        <c-form-feedback
+            *ngIf="form.get('tercero')?.invalid && form.get('tercero')?.touched">
+            Por favor seleccione un diario.
+        </c-form-feedback>
+    </c-col>
+
+    <!-- Fecha de Creación -->
+    <c-col [md]="6" style="position: relative;">
+        <label cLabel for="fecha_creacion">Fecha de Creación</label>
+        <input matInput [matDatepicker]="picker1"
+            formControlName="fechaCreacion" cFormControl id="fecha_creacion"
+            required type="text" style="width: 200px;" />
+        <mat-datepicker-toggle matSuffix
+            [for]="picker1"></mat-datepicker-toggle>
+        <mat-datepicker #picker1></mat-datepicker>
+        <c-form-feedback
+            *ngIf="form.get('fechaCreacion')?.invalid && form.get('fechaCreacion')?.touched">
+            Por favor, seleccione una fecha válida.
+        </c-form-feedback>
+    </c-col>
+
+    <!-- Fecha de Vencimiento -->
+    <c-col [md]="6" style="position: relative;">
+        <label cLabel for="fecha_vencimiento">Fecha de Vencimiento</label>
+        <input matInput [matDatepicker]="picker2"
+            formControlName="fechaVencimiento" cFormControl
+            id="fecha_vencimiento" required type="text" style="width: 200px;" />
+        <mat-datepicker-toggle matSuffix
+            [for]="picker2"></mat-datepicker-toggle>
+        <mat-datepicker #picker2></mat-datepicker>
+        <c-form-feedback
+            *ngIf="form.get('fechaVencimiento')?.errors?.['dateInvalid'] && form.get('fechaVencimiento')?.touched">
+            La fecha de vencimiento debe ser mayor o igual a la fecha de
+            creación.
+        </c-form-feedback>
+        <c-form-feedback
+            *ngIf="form.get('fechaVencimiento')?.invalid && !form.get('fechaVencimiento')?.errors?.['dateInvalid'] && form.get('fechaVencimiento')?.touched">
+            Por favor, seleccione una fecha válida.
+        </c-form-feedback>
+    </c-col>
+
+    <c-col [md]="6" style="position: relative;">
+        <label cLabel for="total">Total</label>
+        <input matInput formControlName="total" cFormControl id="total" required type="text" [value]="formattedTotal" (input)="onTotalChange($event)" />
+        <c-form-feedback *ngIf="form.get('total')?.invalid && form.get('total')?.touched">
+            Por favor, ingrese un valor válido.
+        </c-form-feedback>
+    </c-col>
+
+    <c-col [xs]="12">
+        <button cButton color="primary" type="submit">
+            Enviar formulario
+        </button>
+    </c-col>
+</form>

@@ -1,0 +1,56 @@
+<div class='demo-app'>
+  <div class='demo-app-sidebar'>
+    <div class='demo-app-sidebar-section'>
+      <label>
+        <input
+          type='checkbox'
+          [checked]='calendarOptions().weekends'
+          (change)='handleWeekendsToggle()' />
+        Mostrar fines de semana
+      </label>
+    </div>
+
+
+    <div class='demo-app-main'>
+      <full-calendar *ngIf='calendarVisible()' [options]='calendarOptions()'>
+        <ng-template  #eventContent let-arg>
+          <div [ngStyle]="{
+                'background-color': arg.event.backgroundColor,
+                'border-color': arg.event.borderColor,
+                'border-style': 'solid',
+                'padding': '5px',
+                'border-radius': '4px',
+                'color': '#000'
+              }">
+              
+            <div>{{ arg.event.title }}</div>
+            <div style="font-size: small;">
+              <span><i>{{ arg.event.extendedProps['status']
+                  }}</i></span>
+              <span *ngIf="arg.event.extendedProps['description']">
+                <br />{{ arg.event.extendedProps['description'] }}
+              </span>
+            </div>
+          </div>
+        </ng-template>
+      </full-calendar>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para agregar registro -->
+<c-modal id="addRecordModal" [visible]="addRecordModalVisible"
+  (visibleChange)="handleAddRecordModalChange($event)">
+  <c-modal-header>
+    <h5 cModalTitle>Agregar registro</h5>
+    <button (click)="closeAddRecordModal()" cButtonClose></button>
+  </c-modal-header>
+  <c-modal-body>
+    <app-form-event></app-form-event>
+  </c-modal-body>
+  <c-modal-footer>
+    <button (click)="closeAddRecordModal()" cButton
+      color="secondary">Close</button>
+    <button cButton color="primary">Save changes</button>
+  </c-modal-footer>
+</c-modal>
