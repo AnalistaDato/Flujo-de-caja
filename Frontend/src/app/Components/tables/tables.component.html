@@ -4,6 +4,11 @@
     <div class="card">
       <div class="card-header">
         <c-row class="align-items-center">
+          <!-- CoreUI Alert Component -->
+          <c-alert *ngIf="showAlert" color="info" (click)="showAlert = false">
+            {{ uploadMessage }}
+          </c-alert>
+
           <!-- Columna para el título centrado -->
           <c-col class="text-left" style="flex: 1;">
             <h5>Facturas</h5>
@@ -37,11 +42,12 @@
               <th>Tercero</th>
               <th>Fecha de Factura</th>
               <th>Fecha de Vencimiento</th>
-              <th>Total</th>
+              <th>Total</th>  
               <th>Adeudado</th>
-              <th>Pago</th>
+              <th>Fecha Reprogramación</th> 
+              <th>Banco</th> 
+              <th>Confirmación</th>
               <th>Estado</th>
-              <th>Fecha Reprogramación</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -54,25 +60,11 @@
               <td>{{ item.fecha_vencimiento | date }}</td>
               <td>{{ item.total }}</td>
               <td>{{ item.importe_adeudado }}</td>
-              <td>{{ item.estado_pago }}</td>
-              <td>{{ item.estado }}</td>
               <td>{{ item.fecha_reprogramacion }}</td>
-              <td>
-                <div class="btn-group" role="group">
-                  <button type="button" class="btn btn-primary btn-sm"
-                    (click)="onEdit(item.id)" title="Editar">
-                    <i class="bi bi-pencil"></i>
-                  </button>
-                  <button type="button" class="btn btn-warning btn-sm"
-                    (click)="onInactivate(item.id)" title="Inactivar">
-                    <i class="bi bi-x-circle"></i>
-                  </button>
-                  <button type="button" class="btn btn-info btn-sm"
-                    (click)="onReschedule(item.id)" title="Reprogramar">
-                    <i class="bi bi-calendar-plus"></i>
-                  </button>
-                </div>
-              </td>
+              <td>{{ item.cuenta_bancaria_numero }}</td>
+              <td>{{ item.nuevo_pago }}</td>
+              <td>{{ item.estado_pago }}</td>
+             
             </tr>
           </tbody>
         </table>
@@ -96,6 +88,18 @@
       color="secondary" type="submit">Close</button>
     <button cButton color="primary">Save changes</button>
   </c-modal-footer>
+</c-modal>
+
+<!-- Modal para confirmar -->
+<c-modal id="ActdModal" [visible]="ActModalVisible" 
+  (visibleChange)="handleActModalChange($event)" class="custom-modal-width">
+  <c-modal-header>
+    <h5 cModalTitle>Agregar registro</h5>
+    <button (click)="closeActdModal()" cButtonClose></button>
+  </c-modal-header>
+  <c-modal-body>
+    <app-form></app-form>
+  </c-modal-body>
 </c-modal>
 
 <!-- Modal para subir documento -->
@@ -122,8 +126,3 @@
       color="secondary">Cerrar</button>
   </c-modal-footer>
 </c-modal>
-
-<!-- CoreUI Alert Component -->
-<c-alert *ngIf="showAlert" color="info" (click)="showAlert = false">
-  {{ uploadMessage }}
-</c-alert>

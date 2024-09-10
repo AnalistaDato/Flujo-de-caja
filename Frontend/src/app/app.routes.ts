@@ -32,7 +32,16 @@ export const routes: Routes = [
         loadChildren: () => import('./Components/register/routes').then((m) => m.routes),
         canActivate: [authGuard]
       },
-
+      {
+        path: 'flujo_de_caja',
+        loadChildren: () => import('./Components/flujo-de-caja/routes').then((m) => m.routes),
+        canActivate: [authGuard]
+      },
+      {
+        path: 'extracto',
+        loadChildren: () => import('./Components/extracto/routes').then((m) => m.routes),
+        canActivate: [authGuard]
+      },
     ]
     ,
     canActivate: [authGuard]

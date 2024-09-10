@@ -8,7 +8,7 @@ const router = express.Router();
 // Configure Multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    cb(null, 'extracto/');
   },
   filename: (req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);
@@ -27,7 +27,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ storage, fileFilter });
 
 // Route to upload and process a file
-router.post('/upload', upload.single('file'), (req, res) => {
+router.post('/extracto', upload.single('file'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: 'No file uploaded or invalid file type.' });
   }
@@ -35,7 +35,7 @@ router.post('/upload', upload.single('file'), (req, res) => {
   const filePath = req.file.path;
 
   // Ruta al archivo de Python
-  const pythonScriptPath = path.join(__dirname, '../Scripts/script.py');
+  const pythonScriptPath = path.join(__dirname, '../Scripts/script_2.py');
 
   // Comando para ejecutar el script de Python
   const command = `python "${pythonScriptPath}" "${filePath}"`;

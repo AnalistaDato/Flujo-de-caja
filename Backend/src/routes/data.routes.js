@@ -2,22 +2,29 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../db");
 
+// Función para formatear la fecha
+function formatDate(date) {
+  if (!date || date === '1969-12-31') return null; // Cambia a null si prefieres null en lugar de cadena vacía
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 router.get("/datos", async (req, res) => {
   try {
     const { draw, start, length, search, order, columns } = req.query;
 
-    // Conversión de parámetros
     const drawInt = parseInt(draw, 10) || 1;
     const startInt = parseInt(start, 10) || 0;
     const lengthInt = parseInt(length, 10) || 10;
 
-    // Manejar el parámetro de búsqueda
     let searchValue = "";
     if (search) {
       searchValue = search;
     }
 
-    // Manejar los parámetros de orden
     let orderParams = [{ column: 0, dir: "asc" }];
     if (order) {
       try {
@@ -27,7 +34,6 @@ router.get("/datos", async (req, res) => {
       }
     }
 
-    // Manejar los parámetros de columnas
     let columnsParams = [];
     if (columns) {
       try {
@@ -37,82 +43,197 @@ router.get("/datos", async (req, res) => {
       }
     }
 
-    // Construcción de la consulta SQL
-    let query = "SELECT * FROM facturas WHERE estado_g != 'inactivo'";
-    let queryParams = [];
+    let query = `
+      SELECT 
+        f.id,
+        f.numero,
+        f.nombre_socio,
+        f.fecha_factura,
+        f.fecha_vencimiento,
+        f.actividades,
+        f.importe_sin_impuestos,
+        f.impuestos,
+        f.total,
+        f.total_en_divisa,
+        f.importe_adeudado,
+        f.estado_pago,
+        f.estado,
+        f.estado_g,
+        f.fecha_reprogramacion,
+        f.conf_banco,
+        f.nuevo_pago,
+        f.empresa,
+        c.cuenta AS cuenta_bancaria_numero
+      FROM facturas f
+      LEFT JOIN cuentas_bancarias c ON f.conf_banco = c.id
+      WHERE f.estado_g != 'inactivo'
+      ORDER BY ${columnsParams[orderParams[0].column]?.data || "f.numero"} ${orderParams[0].dir}
+      LIMIT ? OFFSET ?
+    `;
+    let queryParams = [lengthInt, startInt];
 
     if (searchValue) {
-      query += " AND (id LIKE ? OR numero LIKE ? OR nombre_socio LIKE ?)";
-      queryParams.push(`%${searchValue}%`,`%${searchValue}%`, `%${searchValue}%`);
+      query = query.replace('WHERE', `WHERE (f.id LIKE ? OR f.numero LIKE ? OR f.nombre_socio LIKE ?) AND`);
+      queryParams.unshift(`%${searchValue}%`, `%${searchValue}%`, `%${searchValue}%`);
     }
 
-    const orderColumn = columnsParams[orderParams[0].column]?.data || "numero";
-    const orderDir = orderParams[0].dir || "asc";
-    query += ` ORDER BY ${orderColumn} ${orderDir}`;
-
-    query += " LIMIT ? OFFSET ?";
-    queryParams.push(lengthInt, startInt);
-
-    // Ejecutar consulta
     const [rows] = await pool.query(query, queryParams);
 
-    // Contar registros totales sin filtro
-    const [totalRows] = await pool.query(
-      "SELECT COUNT(*) AS count FROM facturas"
-    );
+    const formattedRows = rows.map(row => ({
+      ...row,
+      fecha_factura: formatDate(row.fecha_factura),
+      fecha_vencimiento: formatDate(row.fecha_vencimiento),
+      fecha_reprogramacion: formatDate(row.fecha_reprogramacion),
+    }));
+
+    const [totalRows] = await pool.query("SELECT COUNT(*) AS count FROM facturas");
     const recordsTotal = totalRows[0].count;
 
-    // Contar registros filtrados
     const [filteredRows] = await pool.query(
       query.replace("LIMIT ? OFFSET ?", ""),
       queryParams.slice(0, -2)
     );
     const recordsFiltered = filteredRows.length;
 
-    // Enviar respuesta
     res.json({
       draw: drawInt,
       recordsTotal: recordsTotal,
       recordsFiltered: recordsFiltered,
-      data: rows,
+      data: formattedRows,
     });
   } catch (err) {
     console.error(err);
     res.status(500).send("Error al obtener los datos");
   }
-  
 });
 
-router.put("/datos/:id/inactivate", async (req, res) => {
+router.get("/datos/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const [result] = await pool.query(
-      "UPDATE facturas SET estado_g = 'inactivo' WHERE id = ?",
-      [id]
-    );
-    res.json({ message: "Registro inactivado exitosamente" });
+    const [rows] = await pool.query(`
+      SELECT 
+        f.id,
+        f.numero,
+        f.nombre_socio,
+        f.fecha_factura,
+        f.fecha_vencimiento,
+        f.actividades,
+        f.importe_sin_impuestos,
+        f.impuestos,
+        f.total,
+        f.total_en_divisa,
+        f.importe_adeudado,
+        f.estado_pago,
+        f.estado,
+        f.estado_g,
+        f.fecha_reprogramacion,
+        f.conf_banco,
+        f.nuevo_pago,
+        f.empresa,
+        c.cuenta AS cuenta_bancaria_numero
+      FROM facturas f
+      LEFT JOIN cuentas_bancarias c ON f.conf_banco = c.id
+      WHERE f.id = ?
+    `, [id]);
+
+    if (rows.length > 0) {
+      const factura = rows[0];
+
+      // Formatear las fechas antes de devolver los resultados
+      factura.fecha_factura = formatDate(factura.fecha_factura);
+      factura.fecha_vencimiento = formatDate(factura.fecha_vencimiento);
+      factura.fecha_reprogramacion = formatDate(factura.fecha_reprogramacion);
+
+      res.json(factura);
+    } else {
+      res.status(404).json({ message: "Factura no encontrada" });
+    }
   } catch (err) {
     console.error(err);
-    res.status(500).send("Error al inactivar el registro");
+    res.status(500).send("Error al obtener la factura");
   }
 });
 
 router.put("/datos/:id", async (req, res) => {
   const { id } = req.params;
-  const { nombre_socio, fecha_factura, fecha_vencimiento, total, importe_adeudado, estado_pago, estado } = req.body;
+  const {
+    numero,
+    nombre_socio,
+    fecha_factura,
+    fecha_vencimiento,
+    actividades,
+    importe_sin_impuestos,
+    impuestos,
+    total,
+    total_en_divisa,
+    importe_adeudado,
+    estado_pago,
+    estado,
+    estado_g, 
+    fecha_reprogramacion,
+    conf_banco,
+    nuevo_pago,
+    empresa
+  } = req.body;
 
   try {
-    const [result] = await pool.query(
-      "UPDATE facturas SET nombre_socio = ?, fecha_factura = ?, fecha_vencimiento = ?, total = ?, importe_adeudado = ?, estado_pago = ?, estado = ? WHERE id = ?",
-      [nombre_socio, fecha_factura, fecha_vencimiento, total, importe_adeudado, estado_pago, estado, id]
-    );
-    res.json({ message: "Registro actualizado exitosamente" });
+    // Consulta de actualización
+    const query = `
+      UPDATE facturas 
+      SET 
+        numero = ?, 
+        nombre_socio = ?, 
+        fecha_factura = ?, 
+        fecha_vencimiento = ?, 
+        actividades = ?, 
+        importe_sin_impuestos = ?, 
+        impuestos = ?, 
+        total = ?, 
+        total_en_divisa = ?, 
+        importe_adeudado = ?, 
+        estado_pago = ?, 
+        estado = ?, 
+        estado_g = ?, 
+        fecha_reprogramacion = ?,
+        conf_banco = ?,
+        nuevo_pago = ?,
+        empresa = ?
+      WHERE id = ?
+    `;
+
+    const queryParams = [
+      numero,
+      nombre_socio,
+      fecha_factura,
+      fecha_vencimiento,
+      actividades,
+      importe_sin_impuestos,
+      impuestos,
+      total,
+      total_en_divisa,
+      importe_adeudado,
+      estado_pago,
+      estado,
+      estado_g,
+      fecha_reprogramacion,
+      conf_banco,
+      nuevo_pago,
+      empresa,
+      id
+    ];
+
+    const [result] = await pool.query(query, queryParams);
+
+    if (result.affectedRows > 0) {
+      res.json({ message: "Factura actualizada correctamente" });
+    } else {
+      res.status(404).json({ message: "Factura no encontrada" });
+    }
   } catch (err) {
     console.error(err);
-    res.status(500).send("Error al actualizar el registro");
+    res.status(500).send("Error al actualizar la factura");
   }
 });
-
 
 module.exports = router;

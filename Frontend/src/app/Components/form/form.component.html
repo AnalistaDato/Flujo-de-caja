@@ -1,0 +1,53 @@
+<form [formGroup]="form" cForm cRow class="needs-validation" ngNativeValidate
+  (ngSubmit)="onSubmit()">
+
+
+  <!-- Fecha de Creación (Non-editable) -->
+  <c-col [md]="6" style="position: relative;">
+    <label cLabel for="fecha_creacion">Fecha de Creación</label>
+    <input matInput formControlName="fechaCreacion" cFormControl
+      id="fecha_creacion" required type="text" style="width: 200px;" />
+  </c-col>
+
+  <!-- Fecha de Reprogramación (Editable) -->
+  <c-col [md]="6" style="position: relative;">
+    <label cLabel for="fecha_reprogramacion">Reprogramación</label>
+    <input matInput [matDatepicker]="picker2"
+      formControlName="fecha_reprogramacion" cFormControl
+      id="fecha_reprogramacion" required type="text" style="width: 200px;" />
+    <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+    <mat-datepicker #picker2></mat-datepicker>
+  </c-col>
+
+  <!-- Saldo (Non-editable) -->
+  <c-col [md]="6">
+    <label cLabel for="saldo">Saldo</label>
+    <input cFormControl id="saldo" formControlName="saldo" required
+      type="number" min="0" step="0.01">
+  </c-col>
+
+  <!-- Saldo Real (Editable) -->
+  <c-col [md]="6">
+    <label cLabel for="nuevo_pago">Saldo Real</label>
+    <input cFormControl id="nuevo_pago" formControlName="nuevo_pago" required
+      type="number" min="0" step="0.01">
+  </c-col>
+
+  <!-- Select -->
+
+  <c-col [md]="12">
+    <label cLabel for="conf_banco">Cuenta</label>
+  <select cSelect cFormControl id="conf_banco" formControlName="conf_banco">
+    <option *ngFor="let cuenta of cuentas" [value]="cuenta.id">
+      {{ cuenta.cuenta }} - {{ cuenta.banco }}
+    </option>
+  </select>
+</c-col>
+
+
+  <!-- Botón de Enviar -->
+  <c-col [xs]="12">
+    <button cButton color="primary" type="submit">
+      Enviar formulario
+    </button>
+  </c-col>

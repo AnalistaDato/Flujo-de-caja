@@ -31,15 +31,14 @@ import { UploadService } from '../../Services/upload.service';
 import { Config } from 'datatables.net-bs5';
 import { HttpParams } from '@angular/common/http';
 import { FormEventComponent } from '../form-event/form-event.component';
-import { FormComponent } from '../form/form.component';
-import { Factura } from '../../Services/data.service'; // Asegúrate de importar Factura si está en otro archivo
+import { ExtractoService } from '../../Services/extracto.service';
+import { ExtractoDataService } from '../../Services/extracto-data.service';
+
 
 @Component({
-  selector: 'app-tables',
+  selector: 'app-extracto',
   standalone: true,
-  imports: [
-    FormComponent,
-    FormEventComponent,
+  imports: [FormEventComponent,
     CommonModule,
     DataTablesModule,
     AlertComponent,
@@ -63,28 +62,26 @@ import { Factura } from '../../Services/data.service'; // Asegúrate de importar
     ButtonDirective,
     ContainerComponent,
     GridModule,
-    IconDirective
-  ],
-  templateUrl: './tables.component.html',
-  styleUrls: ['./tables.component.css']
+    IconDirective],
+  templateUrl: './extracto.component.html',
+  styleUrl: './extracto.component.css'
 })
-export class TablesComponent implements OnInit, OnDestroy {
+export class ExtractoComponent implements OnInit, OnDestroy {
 
   dtOptions: Config = {};
   dtTrigger: Subject<void> = new Subject();
 
-  data: Factura[] = [];
+  data: any[] = [];
 
   addRecordModalVisible: boolean = false;
   uploadModalVisible: boolean = false;
-  ActModalVisible: boolean = false;
   public selectedFile: File | null = null;
   public uploadMessage: string = '';
   public showAlert: boolean = false;
 
   constructor(
-    private uploadService: UploadService,
-    private dataService: DataService
+    private extractoService: ExtractoService,
+    private ExtractoDataService: ExtractoDataService,
   ) { }
 
   ngOnInit(): void {
@@ -100,7 +97,7 @@ export class TablesComponent implements OnInit, OnDestroy {
           .set('order', JSON.stringify(dataTablesParams.order))
           .set('columns', JSON.stringify(dataTablesParams.columns));
 
-        this.dataService.getDatos(params).subscribe({
+        this.ExtractoDataService.getDatos(params).subscribe({
           next: (response: any) => {
             this.data = response.data; // Populate the data property
             callback({
@@ -117,32 +114,26 @@ export class TablesComponent implements OnInit, OnDestroy {
       },
       columns: [
         { data: 'id' },
-        { data: 'numero' },
-        { data: 'nombre_socio' },
-        { data: 'fecha_factura' },
-        { data: 'fecha_vencimiento' },
-        { data: 'total' },
-        { data: 'importe_adeudado' },
-        { data: 'fecha_reprogramacion' },
-        { data: 'cuenta_bancaria_numero' },
-        { data: 'nuevo_pago' },
-        { data: 'estado_pago' },
+        { data: 'fecha' },
+        { data: 'descripcion'},
+        { data: 'valor' },
+        { data: 'saldo' },
         {
           data: null,
           orderable: false,
           render: (data: any) => {
             return `
-          <div class="btn-group" role="group">
-              <button type="button" class="btn btn-success btn-sm reschedule-btn" title="Reprogramar" data-id="${data.id}">
-                  <i class="cil-check"></i> 
-              </button>
-              <button type="button" class="btn btn-primary btn-sm edit-btn" title="Editar" data-id="${data.id}">
+              <div class="btn-group" role="group">
+                <button type="button" class="btn btn-primary btn-sm edit-btn" title="Editar" data-id="${data.id}">
                   <i class="cil-pencil"></i> 
-              </button>
-              <button type="button" class="btn btn-danger btn-sm inactivate-btn" title="Inactivar" data-id="${data.id}">
+                </button>
+                <button type="button" class="btn btn-warning btn-sm reschedule-btn" title="Reprogramar" data-id="${data.id}">
+                  <i class="cil-calendar"></i> 
+                </button>
+                <button type="button" class="btn btn-danger btn-sm inactivate-btn" title="Inactivar" data-id="${data.id}">
                   <i class="cil-ban"></i> 
-              </button>
-          </div>
+                </button>
+              </div>
             `;
           }
         }
@@ -167,7 +158,7 @@ export class TablesComponent implements OnInit, OnDestroy {
         document.querySelectorAll('.reschedule-btn').forEach((button) => {
           button.addEventListener('click', (event: any) => {
             const id = this.getRowDataId(event);
-            this.openActModal(id); // Open the modal when the check button is clicked
+            this.onReschedule(id);
           });
         });
       }
@@ -189,15 +180,17 @@ export class TablesComponent implements OnInit, OnDestroy {
 
   onUpload(): void {
     if (this.selectedFile) {
-      this.uploadService.uploadFile(this.selectedFile).subscribe({
+      this.extractoService.uploadFile(this.selectedFile).subscribe({
         next: (msg) => {
           this.uploadMessage = msg.message;
           this.showAlert = true;
+          this.closeUploadModal();
         },
         error: (err) => {
           this.uploadMessage = 'Error de carga';
           this.showAlert = true;
           console.error('Error de carga', err);
+          this.closeUploadModal();
         }
       });
     }
@@ -211,26 +204,6 @@ export class TablesComponent implements OnInit, OnDestroy {
     this.addRecordModalVisible = false;
   }
 
-  openActModal(id: number): void {
-    // Llama al servicio para obtener la factura por ID
-    this.dataService.getFacturaById(id).subscribe({
-      next: (factura: Factura) => {
-        // Setea la factura seleccionada en el servicio
-        this.dataService.setSelectedFactura(factura);
-  
-        // Abre el modal
-        this.ActModalVisible = true;
-      },
-      error: (err) => {
-        console.error('Error al obtener la factura:', err);
-      }
-    });
-  }
-
-  closeActdModal(): void {
-    this.ActModalVisible = false;
-  }
-
   openUploadModal(): void {
     this.uploadModalVisible = true;
   }
@@ -241,10 +214,6 @@ export class TablesComponent implements OnInit, OnDestroy {
 
   handleAddRecordModalChange(visible: boolean): void {
     this.addRecordModalVisible = visible;
-  }
-
-  handleActModalChange(visible: boolean): void {
-    this.ActModalVisible = visible;
   }
 
   handleUploadModalChange(visible: boolean): void {
@@ -262,14 +231,32 @@ export class TablesComponent implements OnInit, OnDestroy {
   onEdit(id: number): void {
     if (id !== -1) {
       console.log('Editar registro con ID:', id);
-      // Implementar lógica para editar el registro
+      // Lógica para editar el registro
     }
   }
 
   onInactivate(id: number): void {
-    if (id !== -1) {
-      console.log('Inactivar registro con ID:', id);
-      // Implementar lógica para inactivar el registro
+    if (confirm('¿Estás seguro de que quieres inactivar este registro?')) {
+      this.ExtractoDataService.inactivateRecord(id).subscribe({
+        next: (response) => {
+          alert('Registro inactivado exitosamente');
+          this.reloadDataTable();
+        },
+        error: (err) => {
+          console.error('Error al inactivar el registro', err);
+        }
+      });
     }
+  }
+
+  onReschedule(id: number): void {
+    if (id !== -1) {
+      console.log('Reprogramar registro con ID:', id);
+      // Lógica para reprogramar el registro
+    }
+  }
+
+  private reloadDataTable(): void {
+    $('#dataTable').DataTable().ajax.reload();
   }
 }

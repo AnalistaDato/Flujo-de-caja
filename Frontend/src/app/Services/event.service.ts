@@ -4,13 +4,13 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { EventInput } from '@fullcalendar/core';
 
-// Define the interface for the backend event data
-interface BackendEvent {
+// Define la interfaz para los datos de eventos del backend
+export interface BackendEvent {
   id?: string;
   title: string;
-  description: string;
-  start: string | null;
+  start: string | null;  // Las fechas están en formato ISO desde el backend
   end: string | null;
+  description: string;
   status: string;
 }
 
@@ -28,7 +28,7 @@ export class EventService {
         events.map(event => ({
           id: event.id?.toString() || '',
           title: event.title,
-          start: event.start ?? undefined,
+          start: event.start ?? undefined,  // Asegúrate de que las fechas están en formato ISO
           end: event.end ?? undefined,
           backgroundColor: this.getBackgroundColorByStatus(event.status),
           borderColor: this.getBorderColorByStatus(event.status),
@@ -84,3 +84,4 @@ export class EventService {
     }
   }
 }
+  

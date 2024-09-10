@@ -6,8 +6,8 @@ import { catchError, map } from 'rxjs/operators';
 @Injectable({
   providedIn: 'root'
 })
-export class UploadService {
-  private UPLOAD_URL = 'http://localhost:3000/api/upload';
+export class ExtractoService {
+  private UPLOAD_URL = 'http://localhost:3000/api/extracto';
 
   constructor(private http: HttpClient) { }
 

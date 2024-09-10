@@ -1,0 +1,44 @@
+.calendar-container {
+  text-align: center;
+  margin: 20px;
+}
+
+.date-selector {
+  margin-bottom: 20px;
+}
+
+.days-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.day {
+  border: 1px solid #ccc;
+  padding: 3px;           /* Reduce aún más el padding para cuadros más pequeños */
+  margin: 2px;            /* Mantén el margen pequeño para juntar los cuadros */
+  width: 50px;            /* Reduce el ancho para un cuadro más pequeño */
+  height: 40px;           /* Reduce la altura para hacerlo más rectangular */
+  text-align: center;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  font-size: 10px;        /* Reduce el tamaño de la fuente */
+  overflow: hidden;       /* Controla el overflow del contenido */
+}
+
+.day p {
+  margin: 0;
+  font-weight: bold;      /* Mantén la fecha visible */
+}
+
+.day ul {
+  list-style: none;
+  padding: 0;
+  margin: 3px 0 0 0;      /* Ajusta el margen para las transacciones */
+}
+
+.day li {
+  font-size: 8px;         /* Reduce el tamaño de la fuente de las transacciones */
+  white-space: nowrap;    /* Evita que el texto se desborde a la siguiente línea */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Añade puntos suspensivos si el texto es muy largo */
+}
