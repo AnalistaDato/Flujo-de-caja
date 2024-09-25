@@ -1,53 +1,138 @@
-<form [formGroup]="form" cForm cRow class="needs-validation" ngNativeValidate
-  (ngSubmit)="onSubmit()">
 
+<c-card></c-card>
+<c-card-header>
+  <h4>Factura</h4>
+</c-card-header>
 
-  <!-- Fecha de Creación (Non-editable) -->
-  <c-col [md]="6" style="position: relative;">
-    <label cLabel for="fecha_creacion">Fecha de Creación</label>
-    <input matInput formControlName="fechaCreacion" cFormControl
-      id="fecha_creacion" required type="text" style="width: 200px;" />
-  </c-col>
+<c-card-body>
+  <form [formGroup]="form" cForm cRow class="needs-validation" ngNativeValidate
+    (ngSubmit)="onSubmit()">
+    <!-- Fecha de Creación (Non-editable) -->
+    <c-col [md]="6" style="position: relative;">
+      <label cLabel for="fecha_creacion">Fecha de Creación</label>
+      <input matInput formControlName="fechaCreacion" cFormControl
+        id="fecha_creacion" type="text" style="width: 200px;" />
+    </c-col>
 
-  <!-- Fecha de Reprogramación (Editable) -->
-  <c-col [md]="6" style="position: relative;">
-    <label cLabel for="fecha_reprogramacion">Reprogramación</label>
-    <input matInput [matDatepicker]="picker2"
-      formControlName="fecha_reprogramacion" cFormControl
-      id="fecha_reprogramacion" required type="text" style="width: 200px;" />
-    <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
-    <mat-datepicker #picker2></mat-datepicker>
-  </c-col>
+    <!-- Fecha de Reprogramación (Editable) -->
+    <c-col [md]="6" style="position: relative;">
+      <label cLabel for="fecha_reprogramacion">Reprogramación</label>
+      <input matInput [matDatepicker]="picker2"
+        formControlName="fecha_reprogramacion" cFormControl
+        id="fecha_reprogramacion" type="text" style="width: 200px;" />
+      <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+      <mat-datepicker #picker2></mat-datepicker>
+    </c-col>
 
-  <!-- Saldo (Non-editable) -->
-  <c-col [md]="6">
-    <label cLabel for="saldo">Saldo</label>
-    <input cFormControl id="saldo" formControlName="saldo" required
-      type="number" min="0" step="0.01">
-  </c-col>
+    <!-- Saldo (Non-editable) -->
+    <c-col [md]="6">
+      <label cLabel for="saldo">Saldo</label>
+      <input cFormControl id="saldo" formControlName="saldo"
+        type="text" style="width: 200px;"
+        [value]="formatCurrency(form.get('saldo')?.value)" />
+    </c-col>
 
-  <!-- Saldo Real (Editable) -->
-  <c-col [md]="6">
-    <label cLabel for="nuevo_pago">Saldo Real</label>
-    <input cFormControl id="nuevo_pago" formControlName="nuevo_pago" required
-      type="number" min="0" step="0.01">
-  </c-col>
+    <!-- Saldo Real (Editable) -->
+    <c-col [md]="6">
+      <label cLabel for="nuevo_pago">Saldo Real</label>
+      <input cFormControl id="nuevo_pago" formControlName="nuevo_pago"
+        type="number" step="0.01" style="width: 100%;"
+        [attr.placeholder]="getSaldoPlaceholder()"
+        [value]="form.get('nuevo_pago')?.value" />
+    </c-col>
 
-  <!-- Select -->
+    <!-- Diferencia entre saldo y saldo real (Editable) -->
+    <c-col [md]="12">
+      <label cLabel>Diferencia de Saldo</label>
+      <p
+        [ngClass]="{'text-success': form.get('nuevo_pago')?.value <= form.get('saldo')?.value, 'text-danger': form.get('nuevo_pago')?.value > form.get('saldo')?.value}">
+        {{ getSaldoDiferencia() }}
+      </p>
+    </c-col>
 
-  <c-col [md]="12">
-    <label cLabel for="conf_banco">Cuenta</label>
-  <select cSelect cFormControl id="conf_banco" formControlName="conf_banco">
-    <option *ngFor="let cuenta of cuentas" [value]="cuenta.id">
-      {{ cuenta.cuenta }} - {{ cuenta.banco }}
-    </option>
-  </select>
-</c-col>
+    <!-- Select -->
+    <c-col [md]="12">
+      <label cLabel for="conf_banco">Cuenta</label>
+      <select cSelect cFormControl id="conf_banco" formControlName="conf_banco">
+        <option *ngFor="let cuenta of cuentas" [value]="cuenta.id">
+          {{ cuenta.cuenta }} - {{ cuenta.banco }}
+        </option>
+      </select>
+    </c-col>
 
+    <!-- Botón de Enviar -->
+    <c-col [xs]="12">
+      <button cButton color="primary" type="submit" [disabled]="form.invalid">
+        Enviar formulario
+      </button>
+    </c-col>
 
+    <c-card class="mt-4"></c-card>
+    <c-card-header>
+      <h4>Opciones Adicionales</h4>
+    </c-card-header>
+    <c-row class="align-items-center">
+
+      <!-- Parametro (Editable) -->
+      <c-col [md]="5">
+        <label cLabel for="tolerancia">Saldo</label>
+        <input cFormControl id="tolerancia" formControlName="tolerancia"
+          type="number" step="0.01" style="width: 100%;" />
+      </c-col>
+
+      <!-- Parametro fecha (Editable) -->
+      <c-col [md]="6" style="position: relative;">
+        <label cLabel for="fecha">Desde</label>
+        <input matInput [matDatepicker]="picker3"
+          formControlName="fecha" cFormControl
+          id="fecha" type="text" style="width: 180px;" />
+        <mat-datepicker-toggle matSuffix
+          [for]="picker3"></mat-datepicker-toggle>
+        <mat-datepicker #picker3></mat-datepicker>
+      </c-col>
+
+      <!-- Botón de Filtro -->
+      <c-col [xs]="1">
+        <button cButton color="primary" type="button" (click)="onConsolidar()"
+          [disabled]="form.get('valor')?.invalid || form.get('fecha')?.invalid">
+          <svg cIcon name="cilMagnifyingGlass" size="xl" title="Search"></svg>
+        </button>
+      </c-col>
+
+    </c-row>
+  </form>
+
+</c-card-body>
+
+<!-- Tabla para mostrar resultados filtrados -->
+<div *ngIf="filtrados.length > 0" class="table-responsive mt-4">
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Valor</th>
+        <th>Fecha</th>
+        <th>Descripción</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of filtrados">
+        <td>{{ item.id }}</td>
+        <td>{{ item.valor }}</td>
+        <td>{{ item.fecha }}</td>
+        <td>{{ item.descripcion }}</td>
+        <td>
+          <input type="checkbox" [value]="item.id"
+            (change)="onCheckboxChange($event, item.id)" />
+        </td>
+      </tr>
+    </tbody>
+  </table>
   <!-- Botón de Enviar -->
   <c-col [xs]="12">
-    <button cButton color="primary" type="submit">
-      Enviar formulario
+    <button cButton color="primary" color="success"  (click)="updateSelectedStatus()" >
+      Consolidar
     </button>
   </c-col>
+</div>

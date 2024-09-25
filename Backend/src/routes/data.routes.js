@@ -4,11 +4,11 @@ const pool = require("../db");
 
 // Función para formatear la fecha
 function formatDate(date) {
-  if (!date || date === '1969-12-31') return null; // Cambia a null si prefieres null en lugar de cadena vacía
+  if (!date || date === "1969-12-31") return null; // Cambia a null si prefieres null en lugar de cadena vacía
   const d = new Date(date);
   const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
 
@@ -66,27 +66,38 @@ router.get("/datos", async (req, res) => {
         c.cuenta AS cuenta_bancaria_numero
       FROM facturas f
       LEFT JOIN cuentas_bancarias c ON f.conf_banco = c.id
-      WHERE f.estado_g != 'inactivo'
-      ORDER BY ${columnsParams[orderParams[0].column]?.data || "f.numero"} ${orderParams[0].dir}
+      WHERE f.estado_g = 'activo'
+      ORDER BY ${columnsParams[orderParams[0].column]?.data || "f.numero"} ${
+      orderParams[0].dir
+    }
       LIMIT ? OFFSET ?
     `;
     let queryParams = [lengthInt, startInt];
 
     if (searchValue) {
-      query = query.replace('WHERE', `WHERE (f.id LIKE ? OR f.numero LIKE ? OR f.nombre_socio LIKE ?) AND`);
-      queryParams.unshift(`%${searchValue}%`, `%${searchValue}%`, `%${searchValue}%`);
+      query = query.replace(
+        "WHERE",
+        `WHERE (f.id LIKE ? OR f.numero LIKE ? OR f.nombre_socio LIKE ?) AND`
+      );
+      queryParams.unshift(
+        `%${searchValue}%`,
+        `%${searchValue}%`,
+        `%${searchValue}%`
+      );
     }
 
     const [rows] = await pool.query(query, queryParams);
 
-    const formattedRows = rows.map(row => ({
+    const formattedRows = rows.map((row) => ({
       ...row,
       fecha_factura: formatDate(row.fecha_factura),
       fecha_vencimiento: formatDate(row.fecha_vencimiento),
       fecha_reprogramacion: formatDate(row.fecha_reprogramacion),
     }));
 
-    const [totalRows] = await pool.query("SELECT COUNT(*) AS count FROM facturas");
+    const [totalRows] = await pool.query(
+      "SELECT COUNT(*) AS count FROM facturas"
+    );
     const recordsTotal = totalRows[0].count;
 
     const [filteredRows] = await pool.query(
@@ -111,7 +122,8 @@ router.get("/datos/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const [rows] = await pool.query(`
+    const [rows] = await pool.query(
+      `
       SELECT 
         f.id,
         f.numero,
@@ -135,7 +147,9 @@ router.get("/datos/:id", async (req, res) => {
       FROM facturas f
       LEFT JOIN cuentas_bancarias c ON f.conf_banco = c.id
       WHERE f.id = ?
-    `, [id]);
+    `,
+      [id]
+    );
 
     if (rows.length > 0) {
       const factura = rows[0];
@@ -154,6 +168,24 @@ router.get("/datos/:id", async (req, res) => {
     res.status(500).send("Error al obtener la factura");
   }
 });
+// Nueva ruta para inactivar una factura
+router.put("/datos/:id/inactivate", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const query = `UPDATE facturas SET estado_g = 'inactivo' WHERE id = ?`;
+    const [result] = await pool.query(query, [id]);
+
+    if (result.affectedRows > 0) {
+      res.json({ message: "Factura inactivada correctamente" });
+    } else {
+      res.status(404).json({ message: "Factura no encontrada" });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error al inactivar la factura");
+  }
+});
 
 router.put("/datos/:id", async (req, res) => {
   const { id } = req.params;
@@ -170,11 +202,11 @@ router.put("/datos/:id", async (req, res) => {
     importe_adeudado,
     estado_pago,
     estado,
-    estado_g, 
+    estado_g,
     fecha_reprogramacion,
     conf_banco,
     nuevo_pago,
-    empresa
+    empresa,
   } = req.body;
 
   try {
@@ -220,7 +252,7 @@ router.put("/datos/:id", async (req, res) => {
       conf_banco,
       nuevo_pago,
       empresa,
-      id
+      id,
     ];
 
     const [result] = await pool.query(query, queryParams);
@@ -233,6 +265,24 @@ router.put("/datos/:id", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send("Error al actualizar la factura");
+  }
+});
+
+router.put("/datos/:id/consolidado", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const query = `UPDATE facturas SET estado_g = 'consolidado' WHERE id = ?`;
+    const [result] = await pool.query(query, [id]);
+
+    if (result.affectedRows > 0) {
+      res.json({ message: "Estado de la factura actualizado a 'consolidado'" });
+    } else {
+      res.status(404).json({ message: "Factura no encontrada" });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error al actualizar el estado de la factura");
   }
 });
 

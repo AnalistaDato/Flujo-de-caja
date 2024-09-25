@@ -61,4 +61,8 @@ export class DataService {
   clearSelectedFactura(): void {
     this.selectedFacturaSubject.next(null);
   }
+    // New method to update the status to "consolidado"
+    updateToConsolidado(id: number): Observable<any> {
+      return this.http.put<any>(`${this.apiUrl}/${id}/consolidado`, {});
+    }
 }

@@ -42,10 +42,10 @@
               <th>Tercero</th>
               <th>Fecha de Factura</th>
               <th>Fecha de Vencimiento</th>
-              <th>Total</th>  
+              <th>Total</th>
               <th>Adeudado</th>
-              <th>Fecha Reprogramación</th> 
-              <th>Banco</th> 
+              <th>Fecha Reprogramación</th>
+              <th>Banco</th>
               <th>Confirmación</th>
               <th>Estado</th>
               <th>Acciones</th>
@@ -64,7 +64,7 @@
               <td>{{ item.cuenta_bancaria_numero }}</td>
               <td>{{ item.nuevo_pago }}</td>
               <td>{{ item.estado_pago }}</td>
-             
+
             </tr>
           </tbody>
         </table>
@@ -91,10 +91,10 @@
 </c-modal>
 
 <!-- Modal para confirmar -->
-<c-modal id="ActdModal" [visible]="ActModalVisible" 
+<c-modal id="ActdModal" [visible]="ActModalVisible"
   (visibleChange)="handleActModalChange($event)" class="custom-modal-width">
   <c-modal-header>
-    <h5 cModalTitle>Agregar registro</h5>
+    <h5 cModalTitle>Consolidación de facturas</h5>
     <button (click)="closeActdModal()" cButtonClose></button>
   </c-modal-header>
   <c-modal-body>

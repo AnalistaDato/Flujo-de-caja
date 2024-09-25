@@ -119,13 +119,32 @@ export class TablesComponent implements OnInit, OnDestroy {
         { data: 'id' },
         { data: 'numero' },
         { data: 'nombre_socio' },
-        { data: 'fecha_factura' },
-        { data: 'fecha_vencimiento' },
-        { data: 'total' },
-        { data: 'importe_adeudado' },
-        { data: 'fecha_reprogramacion' },
+        {
+          data: 'fecha_factura',
+          render: (data: string) => this.formatDate(data) // Format date
+        },
+        {
+          data: 'fecha_vencimiento',
+          render: (data: string) => this.formatDate(data) // Format date 
+
+        },
+        {
+          data: 'total',
+          render: (data: number) => this.formatCurrency(data) // Format currency
+        },
+        {
+          data: 'importe_adeudado',
+          render: (data: number) => this.formatCurrency(data) // Format currency
+        },
+        {
+          data: 'fecha_reprogramacion',
+          render: (data: string) => this.formatDate(data) // Format date
+        },
         { data: 'cuenta_bancaria_numero' },
-        { data: 'nuevo_pago' },
+        {
+          data: 'nuevo_pago',
+          render: (data: number) => this.formatCurrency(data) // Format currency
+        },
         { data: 'estado_pago' },
         {
           data: null,
@@ -193,6 +212,7 @@ export class TablesComponent implements OnInit, OnDestroy {
         next: (msg) => {
           this.uploadMessage = msg.message;
           this.showAlert = true;
+          this.reloadTableData();  // Recargar los datos de la tabla después de subir el archivo
         },
         error: (err) => {
           this.uploadMessage = 'Error de carga';
@@ -217,7 +237,7 @@ export class TablesComponent implements OnInit, OnDestroy {
       next: (factura: Factura) => {
         // Setea la factura seleccionada en el servicio
         this.dataService.setSelectedFactura(factura);
-  
+
         // Abre el modal
         this.ActModalVisible = true;
       },
@@ -229,6 +249,7 @@ export class TablesComponent implements OnInit, OnDestroy {
 
   closeActdModal(): void {
     this.ActModalVisible = false;
+
   }
 
   openUploadModal(): void {
@@ -241,10 +262,18 @@ export class TablesComponent implements OnInit, OnDestroy {
 
   handleAddRecordModalChange(visible: boolean): void {
     this.addRecordModalVisible = visible;
+    if (!visible) {
+      // Si el modal se cierra después de agregar un registro, recargar la tabla
+      this.reloadTableData();
+    }
   }
 
   handleActModalChange(visible: boolean): void {
     this.ActModalVisible = visible;
+    if (!visible) {
+      // Recargar los datos de la tabla cuando se cierre el modal de reprogramar
+      this.reloadTableData();
+    }
   }
 
   handleUploadModalChange(visible: boolean): void {
@@ -263,13 +292,59 @@ export class TablesComponent implements OnInit, OnDestroy {
     if (id !== -1) {
       console.log('Editar registro con ID:', id);
       // Implementar lógica para editar el registro
+      // Después de editar, recargar los datos de la tabla
+      this.reloadTableData();
     }
   }
 
   onInactivate(id: number): void {
     if (id !== -1) {
-      console.log('Inactivar registro con ID:', id);
-      // Implementar lógica para inactivar el registro
+      const confirmed = window.confirm('¿Estás seguro de que deseas inactivar este registro? Esta acción no se puede deshacer.');
+
+      if (confirmed) {
+        console.log('Inactivar registro con ID:', id);
+
+        // Llamada al servicio para inactivar el registro
+        this.dataService.inactivateRecord(id).subscribe({
+          next: (response) => {
+            console.log('Factura inactivada con éxito:', response.message);
+            // Recargar los datos de la tabla después de inactivar
+          },
+          error: (error) => {
+            console.error('Error al inactivar la factura:', error);
+          }
+        });
+      } else {
+        console.log('Inactivación cancelada por el usuario.');
+      }
     }
+    this.reloadTableData();
   }
+
+  formatCurrency(value: number): string {
+    return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
+  }
+  formatDate(date: string): string {
+    const formattedDate = new Date(date);
+    return formattedDate.toLocaleDateString('es-CO');
+  }
+
+  reloadTableData(): void {
+    this.dtTrigger.next();
+  }
+  onUpdateToConsolidado(id: number): void {
+    this.dataService.updateToConsolidado(id).subscribe({
+      next: (response) => {
+        console.log('Registro actualizado a consolidado:', response);
+        this.reloadTableData();
+      },
+      error: (err) => {
+        console.error('Error al actualizar a consolidado:', err);
+      }
+    });
+  }
+
+
+
+
 }

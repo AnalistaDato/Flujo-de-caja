@@ -9,7 +9,7 @@ DATABASE_URI = "mysql+pymysql://root:@localhost:3306/flujo_de_caja"
 engine = create_engine(DATABASE_URI)
 
 def process_file(file_path):
-    """Lee un archivo Excel y retorna un DataFrame."""
+    """Lee un archivo Excel o CSV y retorna un DataFrame."""
     if file_path.endswith(".csv"):
         df = pd.read_csv(file_path)
     elif file_path.endswith(".xlsx"):
@@ -63,30 +63,49 @@ def remove_duplicates_from_db(table_name, engine):
 
 def process_and_store(df, table_name):
     """Procesa el DataFrame y lo guarda en la base de datos."""
-    if (
-        "fecha" in df.columns
-        and "descripcion" in df.columns
-        and "valor" in df.columns
-        and "saldo" in df.columns
-    ):
+    if {"fecha", "descripcion", "valor", "saldo"}.issubset(df.columns):
+        # Convertir 'fecha' a datetime
         df["fecha"] = df["fecha"].apply(
             lambda x: convert_to_datetime(x) if isinstance(x, str) else x
         )
-        
 
-        df.drop_duplicates(inplace=True)
+        # Convertir 'valor' y 'saldo' a valores numéricos
+        df["valor"] = df["valor"].replace({r'[^0-9.-]': ''}, regex=True).astype(float)
+        df["saldo"] = df["saldo"].replace({r'[^0-9.-]': ''}, regex=True).astype(float)
 
-        current_time = datetime.now()
-        df["created_at"] = current_time
-        df["updated_at"] = current_time
-        df["estado"] = "activo"
+        # Filtrar las filas que cumplen con las condiciones
+        df_filtered = df[
+            df["descripcion"].str.contains(
+                "PAGO PSE APORTES EN LINEA|IMPTO GOBIERNO 4X1000|PAGO A NOMIN|COBRO IVA PAGOS AUTOMATICOS", 
+                na=False
+            )
+        ]
 
-        df = df[['fecha', 'descripcion', 'valor', 'saldo','estado']]
-     
-        df.to_sql(table_name, con=engine, if_exists="append", index=False)
-        remove_duplicates_from_db(table_name, engine)
+        if not df_filtered.empty:
+            # Reemplazar "PAGO A NOMIN..." por "PAGO A NOMINA"
+            df_filtered.loc[:, "descripcion"] = df_filtered["descripcion"].apply(
+                lambda x: "PAGO A NOMINA" if "PAGO A NOMIN" in x else x
+            )
 
-        print(f"Datos procesados y almacenados en la tabla '{table_name}'.")
+            # Agrupar por 'fecha' y 'descripcion', sumar los valores en 'valor', y tomar el valor menor en 'saldo'
+            df_grouped = df_filtered.groupby(['fecha', 'descripcion']).agg({
+                'valor': 'sum',      # Suma de valores
+                'saldo': 'min',      # Valor mínimo de saldo
+            }).reset_index()
+
+            # Agregar las columnas 'estado', 'created_at' y 'updated_at'
+            df_grouped["estado"] = "activo"
+            current_time = datetime.now()
+            df_grouped["created_at"] = current_time
+            df_grouped["updated_at"] = current_time
+
+            # Guardar en la base de datos
+            df_grouped.to_sql(table_name, con=engine, if_exists="append", index=False)
+            remove_duplicates_from_db(table_name, engine)
+
+            print(f"Datos procesados y almacenados en la tabla '{table_name}'.")
+        else:
+            print("No se encontraron filas con las descripciones indicadas.")
     else:
         print("Las columnas requeridas no se encuentran en el DataFrame.")
 
