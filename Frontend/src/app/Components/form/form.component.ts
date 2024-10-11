@@ -49,6 +49,7 @@ export class FormComponent implements OnInit {
       valor: ['', []],
       fecha: [this.getFirstDayOfMonth(), []],
       tolerancia: ['', []],
+      diferencia: []
     });
 
     this.dataService.selectedFactura$.subscribe(factura => {
@@ -57,6 +58,13 @@ export class FormComponent implements OnInit {
         this.loadCuentas(factura.empresa);
         this.setFormValues(factura);
       }
+    });
+    this.form.get('nuevo_pago')?.valueChanges.subscribe(() => {
+      this.getSaldoDiferencia(); // Recalcula la diferencia cuando 'nuevo_pago' cambia
+    });
+  
+    this.form.get('saldo')?.valueChanges.subscribe(() => {
+      this.getSaldoDiferencia(); // Recalcula la diferencia cuando 'saldo' cambia
     });
   }
 
@@ -101,6 +109,7 @@ export class FormComponent implements OnInit {
       conf_banco: factura.conf_banco || '',
       valor: factura.total,
       fecha: this.getFirstDayOfMonth(),
+      diferencia: factura.diferencia,
     });
   }
   formatCurrency(value: number): string {
@@ -216,6 +225,8 @@ export class FormComponent implements OnInit {
     const saldo = this.form.get('saldo')?.value || 0;
     const nuevoPago = this.form.get('nuevo_pago')?.value || 0;
     const diferencia = saldo - nuevoPago;
+
+    this.form.get('diferencia')?.setValue(diferencia);
     return diferencia > 0
       ? `Saldo a favor: ${this.formatCurrency(diferencia)}`
       : `Saldo en contra: ${this.formatCurrency(Math.abs(diferencia))}`;

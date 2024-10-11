@@ -9,6 +9,8 @@ const extractoRoutes = require('./routes/extracto.route')
 const dataExtrtactoRoutes = require('./routes/data_extracto.routes')
 const cuentasRoutes = require('./routes/cuentas.routes')
 const consolidadoRoutes = require('./routes/consolidado.routes')
+const cuentasContablesRoutes = require('./routes/cuentas_contables.routes')
+const provedoresRoutes = require('./routes/provedores.routes')
 require('./db'); 
 
 const app = express();
@@ -32,6 +34,8 @@ app.use('/api', eventRoutes); // Ruta para manejar eventos desde la base de dato
 app.use('/api', extractoRoutes)// Ruta para subida de extracto
 app.use('/api', cuentasRoutes)// Ruta para subida de extracto
 app.use('/api', consolidadoRoutes)// Consulta de estractos para consolidación
+app.use('/api', cuentasContablesRoutes)// Consulta de estractos para consolidación
+app.use('/api', provedoresRoutes)// Consulta provedores
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
 });

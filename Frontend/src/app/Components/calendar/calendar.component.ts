@@ -27,6 +27,9 @@ import {
   RowComponent,
   ThemeDirective, ModalBodyComponent, ModalComponent, ModalTitleDirective, ModalFooterComponent, ModalHeaderComponent,
 } from '@coreui/angular';
+import { TablesComponent } from '../tables/tables.component';
+import { DataService } from '../../Services/data.service';
+import { CuentasContablesService } from '../../Services/cuentas-contables.service';
 
 
 
@@ -119,8 +122,11 @@ export class CalendarComponent implements OnInit {
     }));
   }
 
- handleDateSelect(selectInfo: DateSelectArg) {
-   
+ 
+  
+
+  handleDateSelect(selectInfo: DateSelectArg) {
+
     const calendarApi = selectInfo.view.calendar;
 
     calendarApi.unselect(); // clear date selection

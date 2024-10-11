@@ -46,19 +46,21 @@
       <label cLabel>Diferencia de Saldo</label>
       <p
         [ngClass]="{'text-success': form.get('nuevo_pago')?.value <= form.get('saldo')?.value, 'text-danger': form.get('nuevo_pago')?.value > form.get('saldo')?.value}">
-        {{ getSaldoDiferencia() }}
+        {{ getSaldoDiferencia() }} <!-- Muestra la diferencia -->
       </p>
     </c-col>
 
-    <!-- Select -->
+    <!-- Select Banco -->
     <c-col [md]="12">
-      <label cLabel for="conf_banco">Cuenta</label>
+      <label cLabel for="conf_banco">Cuenta Bancaria</label>
       <select cSelect cFormControl id="conf_banco" formControlName="conf_banco">
         <option *ngFor="let cuenta of cuentas" [value]="cuenta.id">
           {{ cuenta.cuenta }} - {{ cuenta.banco }}
         </option>
       </select>
     </c-col>
+
+  
 
     <!-- Botón de Enviar -->
     <c-col [xs]="12">

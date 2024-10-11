@@ -7,15 +7,15 @@ const router = express.Router();
 
 // Configure Multer for file uploads
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
+  destination: (_req, _file, cb) => {
     cb(null, 'uploads/');
   },
-  filename: (req, file, cb) => {
+  filename: (_req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);
   }
 });
 
-const fileFilter = (req, file, cb) => {
+const fileFilter = (_req, file, cb) => {
   const allowedMimeTypes = ['text/csv', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
   if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true);

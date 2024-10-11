@@ -112,7 +112,7 @@ router.get("/consolidado", async (req, res) => {
 
     // Contar el total de registros
     const [totalRows] = await pool.query(
-      "SELECT COUNT(*) AS count FROM extracto WHERE estado != 'inactivo'"
+      "SELECT COUNT(*) AS count FROM extracto WHERE estado = 'activo'"
     );
     const recordsTotal = totalRows.count;
 

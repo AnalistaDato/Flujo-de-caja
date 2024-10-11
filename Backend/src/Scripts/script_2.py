@@ -5,7 +5,7 @@ import sys
 import os
 
 # Configura la conexión a la base de datos MariaDB
-DATABASE_URI = "mysql+pymysql://root:@localhost:3306/flujo_de_caja"
+DATABASE_URI = "mysql+pymysql://userDBFlujoCaja:&%Kuin899675GTRE*$kjhPOWqe@10.10.12.221:3306/flujo_de_caja"
 engine = create_engine(DATABASE_URI)
 
 def process_file(file_path):

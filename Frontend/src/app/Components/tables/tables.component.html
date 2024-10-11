@@ -24,6 +24,10 @@
                   title="Transfer Up"></svg>
               </button>
               <button cButton color="success" variant="outline"
+              (click)="openCcModal()">
+              <svg cIcon name="cilDollar" size="xl" title="Plus"></svg>
+            </button>
+              <button cButton color="success" variant="outline"
                 (click)="openAddRecordModal()">
                 <svg cIcon name="cilPlus" size="xl" title="Plus"></svg>
               </button>
@@ -48,6 +52,7 @@
               <th>Banco</th>
               <th>Confirmación</th>
               <th>Estado</th>
+              <th>Cuenta Conteble</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -64,6 +69,7 @@
               <td>{{ item.cuenta_bancaria_numero }}</td>
               <td>{{ item.nuevo_pago }}</td>
               <td>{{ item.estado_pago }}</td>
+              <td>{{ item.cuenta_contable}}</td>
 
             </tr>
           </tbody>
@@ -123,6 +129,32 @@
   <c-modal-footer>
     <button (click)="onUpload()" cButton color="success">Subir</button>
     <button (click)="closeUploadModal()" cButton
+      color="secondary">Cerrar</button>
+  </c-modal-footer>
+</c-modal>
+
+
+<!-- Modal para subir la cuenta contable -->
+<c-modal id="Cc" [visible]="CcModalVisible"
+  (visibleChange)="handleCcModalChange($event)">
+  <c-modal-header>
+    <h5 cModalTitle>Subir documento</h5>
+    <button (click)="closeCcModal()" cButtonClose></button>
+  </c-modal-header>
+  <c-modal-body>
+    <div>
+      <input aria-describedby="inputGroupFileAddon03"
+        aria-label="Upload"
+        cFormControl
+        id="inputGroupFile03"
+        type="file" accept=".csv, .xlsx" (change)="onFileSelected($event)"
+        name="file" />
+      <p>{{ uploadMessage }}</p>
+    </div>
+  </c-modal-body>
+  <c-modal-footer>
+    <button (click)="onUploadCc()" cButton color="success">Subir</button>
+    <button (click)="closeCcModal()" cButton
       color="secondary">Cerrar</button>
   </c-modal-footer>
 </c-modal>

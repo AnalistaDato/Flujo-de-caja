@@ -4,12 +4,16 @@ const pool = require("../db");
 
 // Función para formatear la fecha
 function formatDate(date) {
-  if (!date || date === "1969-12-31") return null; // Cambia a null si prefieres null en lugar de cadena vacía
+  if (!date || date === "1969-12-31") return null;
   const d = new Date(date);
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  const hours = String(d.getHours()).padStart(2, "0");
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+  const seconds = String(d.getSeconds()).padStart(2, "0");
+  
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
 router.get("/datos", async (req, res) => {
@@ -63,10 +67,13 @@ router.get("/datos", async (req, res) => {
         f.conf_banco,
         f.nuevo_pago,
         f.empresa,
-        c.cuenta AS cuenta_bancaria_numero
+        f.cuenta_contable,
+        c.cuenta AS cuenta_bancaria_numero,
+        o.cuenta_contable AS cuenta_contable_c
       FROM facturas f
       LEFT JOIN cuentas_bancarias c ON f.conf_banco = c.id
-      WHERE f.estado_g = 'activo'
+      LEFT JOIN cuentas_contables o On f.numero = o.factura    
+      WHERE f.estado_g = 'activo' OR  f.estado_g ='proyectado'
       ORDER BY ${columnsParams[orderParams[0].column]?.data || "f.numero"} ${
       orderParams[0].dir
     }
@@ -143,9 +150,13 @@ router.get("/datos/:id", async (req, res) => {
         f.conf_banco,
         f.nuevo_pago,
         f.empresa,
-        c.cuenta AS cuenta_bancaria_numero
+        f.diferencia,
+        f.cuenta_contable, 
+        c.cuenta AS cuenta_bancaria_numero,
+        o.cuenta_contable AS cuenta_contable_c
       FROM facturas f
       LEFT JOIN cuentas_bancarias c ON f.conf_banco = c.id
+      LEFT JOIN cuentas_contables o ON f.numero = o.factura   
       WHERE f.id = ?
     `,
       [id]
@@ -207,10 +218,13 @@ router.put("/datos/:id", async (req, res) => {
     conf_banco,
     nuevo_pago,
     empresa,
+    diferencia,
+    cuenta_contable
   } = req.body;
 
   try {
     // Consulta de actualización
+    const formattedFechaReprogramacion = formatDate(fecha_reprogramacion);
     const query = `
       UPDATE facturas 
       SET 
@@ -230,7 +244,9 @@ router.put("/datos/:id", async (req, res) => {
         fecha_reprogramacion = ?,
         conf_banco = ?,
         nuevo_pago = ?,
-        empresa = ?
+        empresa = ?,
+        diferencia = ?,
+        cuenta_contable = ?
       WHERE id = ?
     `;
 
@@ -248,11 +264,13 @@ router.put("/datos/:id", async (req, res) => {
       estado_pago,
       estado,
       estado_g,
-      fecha_reprogramacion,
+      formattedFechaReprogramacion,
       conf_banco,
       nuevo_pago,
       empresa,
+      diferencia,
       id,
+      cuenta_contable
     ];
 
     const [result] = await pool.query(query, queryParams);
@@ -265,6 +283,101 @@ router.put("/datos/:id", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send("Error al actualizar la factura");
+  }
+});
+
+router.post("/datos", async (req, res) => {
+  // Desestructurar los datos que vienen del formulario en el cuerpo de la solicitud
+  const {
+    numero,
+    nombre_socio,
+    fecha_factura,
+    fecha_vencimiento,
+    actividades,
+    importe_sin_impuestos,
+    impuestos,
+    total,
+    total_en_divisa,
+    importe_adeudado,
+    estado_pago,
+    estado,
+    estado_g,
+    fecha_reprogramacion,
+    conf_banco,
+    nuevo_pago,
+    empresa,
+    diferencia,
+    cuenta_contable
+  } = req.body;
+
+  try {
+    // Consulta para insertar una nueva factura
+    const formattedFechaFactura = formatDate(fecha_factura);
+    const formattedFechaVencimiento = formatDate(fecha_vencimiento);
+    const formattedFechaReprogramacion =
+      formatDate(fecha_reprogramacion);
+    const query = `
+      INSERT INTO facturas (
+        numero, 
+        nombre_socio, 
+        fecha_factura, 
+        fecha_vencimiento, 
+        actividades, 
+        importe_sin_impuestos, 
+        impuestos, 
+        total, 
+        total_en_divisa, 
+        importe_adeudado, 
+        estado_pago, 
+        estado, 
+        estado_g, 
+        fecha_reprogramacion, 
+        conf_banco, 
+        nuevo_pago, 
+        empresa, 
+        diferencia,
+        cuenta_contable
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    // Parámetros a insertar en la tabla
+    const queryParams = [
+      numero,
+      nombre_socio,
+      formattedFechaFactura,
+      formattedFechaVencimiento,
+      actividades,
+      importe_sin_impuestos,
+      impuestos,
+      total,
+      total_en_divisa,
+      importe_adeudado,
+      estado_pago,
+      estado,
+      estado_g,
+      formattedFechaReprogramacion,
+      conf_banco,
+      nuevo_pago,
+      empresa,
+      diferencia,
+      cuenta_contable
+    ];
+
+    // Ejecutar la consulta de inserción
+    const [result] = await pool.query(query, queryParams);
+
+    // Verificar si la inserción fue exitosa
+    if (result.affectedRows > 0) {
+      res.json({
+        message: "Factura creada correctamente",
+        id: result.insertId,
+      });
+    } else {
+      res.status(400).json({ message: "Error al crear la factura" });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error al crear la factura");
   }
 });
 

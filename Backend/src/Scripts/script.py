@@ -6,7 +6,7 @@ import sys
 import hashlib
 
 # Configura la conexión a la base de datos MariaDB
-DATABASE_URI = "mysql+pymysql://root:@localhost:3306/flujo_de_caja"
+DATABASE_URI = "mysql+pymysql://userDBFlujoCaja:&%Kuin899675GTRE*$kjhPOWqe@10.10.12.221:3306/flujo_de_caja"
 engine = create_engine(DATABASE_URI)
 
 def process_file(file_path):
@@ -59,7 +59,7 @@ def generate_daily_balances(df):
             "nombre_socio": "SALDO INICIAL",
             "fecha_factura": current_date,
             "fecha_vencimiento": current_date,
-            "total": previous_balance,
+            "total_en_divisa": previous_balance,
             "empresa": last_empresa
         })
 
@@ -69,7 +69,7 @@ def generate_daily_balances(df):
             "nombre_socio": "SALDO FINAL",
             "fecha_factura": current_date,
             "fecha_vencimiento": current_date,
-            "total": saldo_final,
+            "total_en_divisa": saldo_final,
             "empresa": last_empresa
         })
 
@@ -86,7 +86,7 @@ def classify_transactions(df):
             return "SALDO INICIAL"
         elif row["nombre_socio"].strip().upper() == "SALDO FINAL":
             return "SALDO FINAL"
-        return "Ingreso" if row["total"] >= 0 else "Egreso"
+        return "Ingreso" if row["total_en_divisa"] >= 0 else "Egreso"
 
     df["tipo_transaccion"] = df.apply(get_transaction_type, axis=1)
     return df

@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 export interface Factura {
   id: number;
@@ -15,13 +16,16 @@ export interface Factura {
   total_en_divisa: number;
   importe_adeudado: number;
   estado_pago: string;
-  estado: string;
+  estado_g: string;
+  estado:string;
   fecha_reprogramacion: string;
   created_at: string;
   conf_banco: string;
   nuevo_pago: number;
   empresa: string;
   cuenta_bancaria_numero: string;
+  cuenta_contable: string;
+  diferencia: number;
 }
 
 @Injectable({
@@ -37,19 +41,53 @@ export class DataService {
   constructor(private http: HttpClient) { }
 
   getDatos(params: HttpParams): Observable<any> {
-    return this.http.get<any>(this.apiUrl, { params });
+    return this.http.get<any>(this.apiUrl, { params })
+      .pipe(
+        catchError(error => {
+          console.error('Error al obtener los datos:', error);
+          return throwError(error);
+        })
+      );
   }
 
   getFacturaById(id: number): Observable<Factura> {
-    return this.http.get<Factura>(`${this.apiUrl}/${id}`);
+    return this.http.get<Factura>(`${this.apiUrl}/${id}`)
+      .pipe(
+        catchError(error => {
+          console.error(`Error al obtener la factura con ID ${id}:`, error);
+          return throwError(error);
+        })
+      );
+  }
+
+  createRecord(data: Factura): Observable<any> {
+    return this.http.post<any>(this.apiUrl, data)
+      .pipe(
+        catchError(error => {
+          console.error('Error al crear la factura:', error);
+          return throwError(error);
+        })
+      );
   }
 
   editRecord(id: number, data: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, data);
+    return this.http.put<any>(`${this.apiUrl}/${id}`, data)
+      .pipe(
+        catchError(error => {
+          console.error(`Error al editar la factura con ID ${id}:`, error);
+          return throwError(error);
+        })
+      );
   }
 
   inactivateRecord(id: number): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}/inactivate`, {});
+    return this.http.put<any>(`${this.apiUrl}/${id}/inactivate`, {})
+      .pipe(
+        catchError(error => {
+          console.error(`Error al inactivar la factura con ID ${id}:`, error);
+          return throwError(error);
+        })
+      );
   }
 
   // Method to set the selected factura
@@ -61,8 +99,15 @@ export class DataService {
   clearSelectedFactura(): void {
     this.selectedFacturaSubject.next(null);
   }
-    // New method to update the status to "consolidado"
-    updateToConsolidado(id: number): Observable<any> {
-      return this.http.put<any>(`${this.apiUrl}/${id}/consolidado`, {});
-    }
+
+  // New method to update the status to "consolidado"
+  updateToConsolidado(id: number): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${id}/consolidado`, {})
+      .pipe(
+        catchError(error => {
+          console.error(`Error al actualizar el estado a "consolidado" para la factura con ID ${id}:`, error);
+          return throwError(error);
+        })
+      );
+  }
 }

@@ -28,6 +28,7 @@ import {
 import { IconModule, IconDirective } from '@coreui/icons-angular';
 import 'datatables.net-bs5';
 import { UploadService } from '../../Services/upload.service';
+import { CuentasContablesService } from '../../Services//cuentas-contables.service';
 import { Config } from 'datatables.net-bs5';
 import { HttpParams } from '@angular/common/http';
 import { FormEventComponent } from '../form-event/form-event.component';
@@ -78,13 +79,15 @@ export class TablesComponent implements OnInit, OnDestroy {
   addRecordModalVisible: boolean = false;
   uploadModalVisible: boolean = false;
   ActModalVisible: boolean = false;
+  CcModalVisible: boolean = false;
   public selectedFile: File | null = null;
   public uploadMessage: string = '';
   public showAlert: boolean = false;
 
   constructor(
     private uploadService: UploadService,
-    private dataService: DataService
+    private dataService: DataService,
+    private CuentasContablesService: CuentasContablesService
   ) { }
 
   ngOnInit(): void {
@@ -146,6 +149,7 @@ export class TablesComponent implements OnInit, OnDestroy {
           render: (data: number) => this.formatCurrency(data) // Format currency
         },
         { data: 'estado_pago' },
+        {data: 'cuenta_contable'},
         {
           data: null,
           orderable: false,
@@ -154,9 +158,6 @@ export class TablesComponent implements OnInit, OnDestroy {
           <div class="btn-group" role="group">
               <button type="button" class="btn btn-success btn-sm reschedule-btn" title="Reprogramar" data-id="${data.id}">
                   <i class="cil-check"></i> 
-              </button>
-              <button type="button" class="btn btn-primary btn-sm edit-btn" title="Editar" data-id="${data.id}">
-                  <i class="cil-pencil"></i> 
               </button>
               <button type="button" class="btn btn-danger btn-sm inactivate-btn" title="Inactivar" data-id="${data.id}">
                   <i class="cil-ban"></i> 
@@ -223,6 +224,23 @@ export class TablesComponent implements OnInit, OnDestroy {
     }
   }
 
+  onUploadCc(): void {
+    if (this.selectedFile) {
+      this.CuentasContablesService.uploadFile(this.selectedFile).subscribe({
+        next: (msg) => {
+          this.uploadMessage = msg.message;
+          this.showAlert = true;
+          this.reloadTableData();  // Recargar los datos de la tabla después de subir el archivo
+        },
+        error: (err) => {
+          this.uploadMessage = 'Error de carga';
+          this.showAlert = true;
+          console.error('Error de carga', err);
+        }
+      });
+    }
+  }
+
   openAddRecordModal(): void {
     this.addRecordModalVisible = true;
   }
@@ -256,8 +274,16 @@ export class TablesComponent implements OnInit, OnDestroy {
     this.uploadModalVisible = true;
   }
 
+  openCcModal(): void {
+    this.CcModalVisible = true;
+  }
+
   closeUploadModal(): void {
     this.uploadModalVisible = false;
+  }
+
+  closeCcModal(): void {
+    this.CcModalVisible = false;
   }
 
   handleAddRecordModalChange(visible: boolean): void {
@@ -278,6 +304,13 @@ export class TablesComponent implements OnInit, OnDestroy {
 
   handleUploadModalChange(visible: boolean): void {
     this.uploadModalVisible = visible;
+    if (!visible) {
+      this.uploadMessage = '';
+    }
+  }
+
+  handleCcModalChange(visible: boolean): void {
+    this.CcModalVisible = visible;
     if (!visible) {
       this.uploadMessage = '';
     }

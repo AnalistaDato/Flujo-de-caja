@@ -45,7 +45,7 @@ router.get("/data_extracto", async (req, res) => {
     }
 
     // Construcción de la consulta SQL
-    let query = "SELECT * FROM extracto WHERE estado != 'inactivo'";
+    let query = "SELECT * FROM extracto WHERE estado = 'activo'";
     let queryParams = [];
 
     if (searchValue) {
