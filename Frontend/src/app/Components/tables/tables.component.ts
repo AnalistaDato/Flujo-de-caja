@@ -149,7 +149,7 @@ export class TablesComponent implements OnInit, OnDestroy {
           render: (data: number) => this.formatCurrency(data) // Format currency
         },
         { data: 'estado_pago' },
-        {data: 'cuenta_contable'},
+        { data: 'cuenta_contable' },
         {
           data: null,
           orderable: false,

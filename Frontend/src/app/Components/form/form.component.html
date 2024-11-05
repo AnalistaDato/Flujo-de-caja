@@ -1,24 +1,24 @@
-
 <c-card></c-card>
 <c-card-header>
-  <h4>Factura</h4>
+  <h5>Factura {{ form.get('nombre_socio')?.value }}</h5>
 </c-card-header>
 
 <c-card-body>
-  <form [formGroup]="form" cForm cRow class="needs-validation" ngNativeValidate
-    (ngSubmit)="onSubmit()">
+
+
+
+  <form [formGroup]="form" cForm cRow class="needs-validation" ngNativeValidate (ngSubmit)="onSubmit()">
     <!-- Fecha de Creación (Non-editable) -->
     <c-col [md]="6" style="position: relative;">
       <label cLabel for="fecha_creacion">Fecha de Creación</label>
-      <input matInput formControlName="fechaCreacion" cFormControl
-        id="fecha_creacion" type="text" style="width: 200px;" />
+      <input matInput formControlName="fechaCreacion" cFormControl id="fecha_creacion" type="text"
+        style="width: 200px;" />
     </c-col>
 
     <!-- Fecha de Reprogramación (Editable) -->
     <c-col [md]="6" style="position: relative;">
       <label cLabel for="fecha_reprogramacion">Reprogramación</label>
-      <input matInput [matDatepicker]="picker2"
-        formControlName="fecha_reprogramacion" cFormControl
+      <input matInput [matDatepicker]="picker2" formControlName="fecha_reprogramacion" cFormControl
         id="fecha_reprogramacion" type="text" style="width: 200px;" />
       <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
       <mat-datepicker #picker2></mat-datepicker>
@@ -27,18 +27,15 @@
     <!-- Saldo (Non-editable) -->
     <c-col [md]="6">
       <label cLabel for="saldo">Saldo</label>
-      <input cFormControl id="saldo" formControlName="saldo"
-        type="text" style="width: 200px;"
+      <input cFormControl id="saldo" formControlName="saldo" type="text" style="width: 200px;"
         [value]="formatCurrency(form.get('saldo')?.value)" />
     </c-col>
 
     <!-- Saldo Real (Editable) -->
     <c-col [md]="6">
       <label cLabel for="nuevo_pago">Saldo Real</label>
-      <input cFormControl id="nuevo_pago" formControlName="nuevo_pago"
-        type="number" step="0.01" style="width: 100%;"
-        [attr.placeholder]="getSaldoPlaceholder()"
-        [value]="form.get('nuevo_pago')?.value" />
+      <input cFormControl id="nuevo_pago" formControlName="nuevo_pago" type="number" step="0.01" style="width: 100%;"
+        [attr.placeholder]="getSaldoPlaceholder()" [value]="form.get('nuevo_pago')?.value" />
     </c-col>
 
     <!-- Diferencia entre saldo y saldo real (Editable) -->
@@ -60,7 +57,7 @@
       </select>
     </c-col>
 
-  
+
 
     <!-- Botón de Enviar -->
     <c-col [xs]="12">
@@ -78,18 +75,16 @@
       <!-- Parametro (Editable) -->
       <c-col [md]="5">
         <label cLabel for="tolerancia">Saldo</label>
-        <input cFormControl id="tolerancia" formControlName="tolerancia"
-          type="number" step="0.01" style="width: 100%;" />
+        <input cFormControl id="tolerancia" formControlName="tolerancia" type="number" step="0.01"
+          style="width: 100%;" />
       </c-col>
 
       <!-- Parametro fecha (Editable) -->
       <c-col [md]="6" style="position: relative;">
         <label cLabel for="fecha">Desde</label>
-        <input matInput [matDatepicker]="picker3"
-          formControlName="fecha" cFormControl
-          id="fecha" type="text" style="width: 180px;" />
-        <mat-datepicker-toggle matSuffix
-          [for]="picker3"></mat-datepicker-toggle>
+        <input matInput [matDatepicker]="picker3" formControlName="fecha" cFormControl id="fecha" type="text"
+          style="width: 180px;" />
+        <mat-datepicker-toggle matSuffix [for]="picker3"></mat-datepicker-toggle>
         <mat-datepicker #picker3></mat-datepicker>
       </c-col>
 
@@ -125,15 +120,14 @@
         <td>{{ item.fecha }}</td>
         <td>{{ item.descripcion }}</td>
         <td>
-          <input type="checkbox" [value]="item.id"
-            (change)="onCheckboxChange($event, item.id)" />
+          <input type="checkbox" [value]="item.id" (change)="onCheckboxChange($event, item.id)" />
         </td>
       </tr>
     </tbody>
   </table>
   <!-- Botón de Enviar -->
   <c-col [xs]="12">
-    <button cButton color="primary" color="success"  (click)="updateSelectedStatus()" >
+    <button cButton color="primary" color="success" (click)="updateSelectedStatus()">
       Consolidar
     </button>
   </c-col>

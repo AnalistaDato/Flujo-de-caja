@@ -7,8 +7,8 @@ router.get("/events", async (req, res) => {
   const query = `SELECT 
                   id, 
                   nombre_socio AS title,
-                  fecha_vencimiento AS start,
-                  fecha_vencimiento AS end,   
+                  COALESCE(fecha_vencimiento, fecha_reprogramacion) AS start, 
+                  COALESCE(fecha_vencimiento, fecha_reprogramacion) AS end, 
                   total AS description, 
                   estado_pago AS status
                 FROM facturas`;

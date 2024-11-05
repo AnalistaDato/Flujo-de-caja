@@ -3,10 +3,10 @@ from sqlalchemy import create_engine
 from datetime import datetime
 import sys
 import os
+from db import get_engine
 
-# Configura la conexión a la base de datos MariaDB
-DATABASE_URI = "mysql+pymysql://userDBFlujoCaja:&%Kuin899675GTRE*$kjhPOWqe@10.10.12.221:3306/flujo_de_caja"
-engine = create_engine(DATABASE_URI)
+
+engine = get_engine()
 
 
 def process_file(file_path):
@@ -117,4 +117,3 @@ if __name__ == "__main__":
         print("Uso: python script.py <ruta_archivo_o_directorio>")
     else:
         main(sys.argv[1])
-

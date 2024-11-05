@@ -1,0 +1,3 @@
+::ng-deep .custom-modal .modal-dialog {
+    max-width: 80%; /* Ajusta este valor según sea necesario */
+  }

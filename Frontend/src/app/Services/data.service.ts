@@ -17,7 +17,7 @@ export interface Factura {
   importe_adeudado: number;
   estado_pago: string;
   estado_g: string;
-  estado:string;
+  estado: string;
   fecha_reprogramacion: string;
   created_at: string;
   conf_banco: string;

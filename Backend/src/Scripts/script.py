@@ -4,10 +4,10 @@ import pandas as pd
 from datetime import datetime
 import sys
 import hashlib
+from db import get_engine
 
-# Configura la conexión a la base de datos MariaDB
-DATABASE_URI = "mysql+pymysql://userDBFlujoCaja:&%Kuin899675GTRE*$kjhPOWqe@10.10.12.221:3306/flujo_de_caja"
-engine = create_engine(DATABASE_URI)
+
+engine = get_engine()
 
 def process_file(file_path):
     """Lee un archivo CSV o Excel y retorna un DataFrame."""
@@ -37,59 +37,8 @@ def convert_to_datetime(date_str):
         print(f"Tipo de dato inesperado: {type(date_str)}")
         return pd.NaT
 
-def generate_daily_balances(df):
-    """Genera saldos diarios y clasifica los saldos iniciales y finales por empresa."""
-    df = df[df["estado_pago"].str.lower() != "cancelado"]
-    df = df.sort_values("fecha_vencimiento")
-    df["fecha_vencimiento"] = pd.to_datetime(df["fecha_vencimiento"]).dt.date
 
-    previous_balance = 0
-    last_empresa = ""
 
-    new_rows = []
-    for current_date in pd.date_range(df['fecha_vencimiento'].min(), df['fecha_vencimiento'].max()).date:
-        day_data = df[df["fecha_vencimiento"] == current_date]
-        day_transactions_sum = day_data["total"].sum()
-
-        if not day_data.empty:
-            last_empresa = day_data["empresa"].iloc[0]
-
-        new_rows.append({
-            "numero": "",
-            "nombre_socio": "SALDO INICIAL",
-            "fecha_factura": current_date,
-            "fecha_vencimiento": current_date,
-            "total_en_divisa": previous_balance,
-            "empresa": last_empresa
-        })
-
-        saldo_final = previous_balance + day_transactions_sum
-        new_rows.append({
-            "numero": "",
-            "nombre_socio": "SALDO FINAL",
-            "fecha_factura": current_date,
-            "fecha_vencimiento": current_date,
-            "total_en_divisa": saldo_final,
-            "empresa": last_empresa
-        })
-
-        previous_balance = saldo_final
-
-    df_new = pd.DataFrame(new_rows)
-    df = pd.concat([df_new, df]).sort_values(["fecha_vencimiento", "nombre_socio"]).reset_index(drop=True)
-    return df
-
-def classify_transactions(df):
-    """Clasifica las transacciones en ingresos, egresos, saldo inicial o saldo final."""
-    def get_transaction_type(row):
-        if row["nombre_socio"].strip().upper() == "SALDO INICIAL":
-            return "SALDO INICIAL"
-        elif row["nombre_socio"].strip().upper() == "SALDO FINAL":
-            return "SALDO FINAL"
-        return "Ingreso" if row["total_en_divisa"] >= 0 else "Egreso"
-
-    df["tipo_transaccion"] = df.apply(get_transaction_type, axis=1)
-    return df
 
 def determine_company(file_name):
     """Determina la empresa en función del nombre del archivo."""
@@ -124,6 +73,11 @@ def registrar_archivo_procesado(df_archivos):
         print("Archivos registrados con éxito.")
     except Exception as e:
         print(f"Error al registrar archivos: {e}")
+        
+def classify_transactions(df):
+    """Clasifica cada transacción como Ingreso o Egreso en función de 'total_en_divisa'."""
+    df['tipo_transaccion'] = df['total_en_divisa'].apply(lambda x: 'Ingreso' if x >= 0 else 'Egreso')
+    return df        
 
 def main(file_path):
     """Procesa el archivo y guarda los datos en la base de datos."""
@@ -175,15 +129,14 @@ def main(file_path):
                 },
                 inplace=True,
             )
+            # Aplicar clasificación de transacciones
+            df = classify_transactions(df)
 
             current_time = datetime.now()
             df["created_at"] = current_time
             df["updated_at"] = current_time
             df["estado_g"] = "activo"
             df["tipo"] = "Faturado"
-
-            df = generate_daily_balances(df)
-            df = classify_transactions(df)
 
             table_name = "facturas"
             try:

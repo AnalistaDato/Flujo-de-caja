@@ -12,7 +12,7 @@ function formatDate(date) {
   const hours = String(d.getHours()).padStart(2, "0");
   const minutes = String(d.getMinutes()).padStart(2, "0");
   const seconds = String(d.getSeconds()).padStart(2, "0");
-  
+
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
@@ -67,17 +67,16 @@ router.get("/datos", async (req, res) => {
         f.conf_banco,
         f.nuevo_pago,
         f.empresa,
-        f.cuenta_contable,
-        c.cuenta AS cuenta_bancaria_numero,
-        o.cuenta_contable AS cuenta_contable_c
-      FROM facturas f
-      LEFT JOIN cuentas_bancarias c ON f.conf_banco = c.id
-      LEFT JOIN cuentas_contables o On f.numero = o.factura    
-      WHERE f.estado_g = 'activo' OR  f.estado_g ='proyectado'
-      ORDER BY ${columnsParams[orderParams[0].column]?.data || "f.numero"} ${
+        COALESCE(f.cuenta_contable, o.cuenta_contable) AS cuenta_contable,
+    c.cuenta AS cuenta_bancaria_numero
+FROM facturas f
+LEFT JOIN cuentas_bancarias c ON f.conf_banco = c.id
+LEFT JOIN cuentas_contables o ON f.numero = o.factura
+WHERE f.estado_g = 'activo' OR f.estado_g = 'proyectado'
+ORDER BY ${columnsParams[orderParams[0].column]?.data || "f.numero"} ${
       orderParams[0].dir
     }
-      LIMIT ? OFFSET ?
+LIMIT ? OFFSET ?
     `;
     let queryParams = [lengthInt, startInt];
 
@@ -205,13 +204,8 @@ router.put("/datos/:id", async (req, res) => {
     nombre_socio,
     fecha_factura,
     fecha_vencimiento,
-    actividades,
-    importe_sin_impuestos,
-    impuestos,
     total,
-    total_en_divisa,
     importe_adeudado,
-    estado_pago,
     estado,
     estado_g,
     fecha_reprogramacion,
@@ -219,7 +213,7 @@ router.put("/datos/:id", async (req, res) => {
     nuevo_pago,
     empresa,
     diferencia,
-    cuenta_contable
+    cuenta_contable,
   } = req.body;
 
   try {
@@ -232,13 +226,8 @@ router.put("/datos/:id", async (req, res) => {
         nombre_socio = ?, 
         fecha_factura = ?, 
         fecha_vencimiento = ?, 
-        actividades = ?, 
-        importe_sin_impuestos = ?, 
-        impuestos = ?, 
         total = ?, 
-        total_en_divisa = ?, 
         importe_adeudado = ?, 
-        estado_pago = ?, 
         estado = ?, 
         estado_g = ?, 
         fecha_reprogramacion = ?,
@@ -255,13 +244,8 @@ router.put("/datos/:id", async (req, res) => {
       nombre_socio,
       fecha_factura,
       fecha_vencimiento,
-      actividades,
-      importe_sin_impuestos,
-      impuestos,
       total,
-      total_en_divisa,
       importe_adeudado,
-      estado_pago,
       estado,
       estado_g,
       formattedFechaReprogramacion,
@@ -269,18 +253,21 @@ router.put("/datos/:id", async (req, res) => {
       nuevo_pago,
       empresa,
       diferencia,
+      cuenta_contable,
       id,
-      cuenta_contable
     ];
 
     const [result] = await pool.query(query, queryParams);
 
     if (result.affectedRows > 0) {
       res.json({ message: "Factura actualizada correctamente" });
+      console.log(req.body);
     } else {
-      res.status(404).json({ message: "Factura no encontrada" });
+      res.status(404).json({ message: "Factura no encontrada en edición" });
+      console.log(req.body);
     }
   } catch (err) {
+    console.log(req.body);
     console.error(err);
     res.status(500).send("Error al actualizar la factura");
   }
@@ -307,15 +294,14 @@ router.post("/datos", async (req, res) => {
     nuevo_pago,
     empresa,
     diferencia,
-    cuenta_contable
+    cuenta_contable,
   } = req.body;
 
   try {
     // Consulta para insertar una nueva factura
     const formattedFechaFactura = formatDate(fecha_factura);
     const formattedFechaVencimiento = formatDate(fecha_vencimiento);
-    const formattedFechaReprogramacion =
-      formatDate(fecha_reprogramacion);
+    const formattedFechaReprogramacion = formatDate(fecha_reprogramacion);
     const query = `
       INSERT INTO facturas (
         numero, 
@@ -360,7 +346,7 @@ router.post("/datos", async (req, res) => {
       nuevo_pago,
       empresa,
       diferencia,
-      cuenta_contable
+      cuenta_contable,
     ];
 
     // Ejecutar la consulta de inserción

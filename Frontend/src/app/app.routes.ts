@@ -33,6 +33,11 @@ export const routes: Routes = [
         canActivate: [authGuard]
       },
       {
+        path: 'facturas',
+        loadChildren: () => import('./Components/facturas/routes').then((m) => m.routes),
+        canActivate: [authGuard]
+      },
+      {
         path: 'flujo_de_caja',
         loadChildren: () => import('./Components/flujo-de-caja/routes').then((m) => m.routes),
         canActivate: [authGuard]

@@ -23,6 +23,12 @@ export const navItems: INavData[] = [
     iconComponent: { name: 'cil-list' }
   },
   {
+    name: 'Facturas Consolidadas',
+    url: '/facturas',
+    linkProps: { fragment: 'headings' },
+    iconComponent: { name: 'cil-check' }
+  },
+  {
     name: 'Usuarios',
     iconComponent: { name: 'cil-user' },
     url: '/register'

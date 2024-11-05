@@ -41,6 +41,7 @@ export class FormComponent implements OnInit {
 
   ngOnInit(): void {
     this.form = this.fb.group({
+      nombre_socio:[],
       fechaCreacion: [{ value: '', disabled: true }],
       fecha_reprogramacion: [''],
       saldo: [{ value: '', disabled: true }],
@@ -102,6 +103,7 @@ export class FormComponent implements OnInit {
 
   setFormValues(factura: Factura): void {
     this.form.patchValue({
+      nombre_socio: factura.nombre_socio,
       fechaCreacion: factura.fecha_factura,
       fecha_reprogramacion: factura.fecha_reprogramacion || '',
       saldo: factura.total,
@@ -125,20 +127,21 @@ export class FormComponent implements OnInit {
 
   onSubmit() {
     if (this.form.valid && this.facturaData) {
+      // Extrae solo los campos necesarios para la actualización
       const updatedData = {
-        ...this.facturaData,
-        ...this.form.value
+        id: Number(this.facturaData.id), // Asegúrate de incluir el ID de la factura
+        nombre_socio: this.form.get('nombre_socio')?.value,
+        fecha_reprogramacion: this.form.get('fecha_reprogramacion')?.value,
+        nuevo_pago: this.parseCurrency(this.form.get('nuevo_pago')?.value),
+        conf_banco: this.form.get('conf_banco')?.value,
+        diferencia: this.form.get('diferencia')?.value
       };
-
-      // Convierte los valores de vuelta a números antes de enviar
-      updatedData.importe_adeudado = this.parseCurrency(updatedData.importe_adeudado);
-      updatedData.nuevo_pago = this.parseCurrency(updatedData.nuevo_pago);
-
-      this.dataService.editRecord(this.facturaData.id, updatedData).subscribe(
+  
+      this.dataService.editRecord(updatedData.id, updatedData).subscribe(
         (response) => {
           console.log('Factura actualizada con éxito', response);
           alert('Factura actualizada con éxito.');
-          // Optionally, navigate away or reset the form
+          // Opcionalmente, navegar o resetear el formulario
         },
         (error) => {
           console.error('Error al actualizar la factura:', error);

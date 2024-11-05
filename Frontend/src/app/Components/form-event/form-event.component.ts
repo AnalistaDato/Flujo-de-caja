@@ -104,7 +104,7 @@ export class FormEventComponent implements OnInit {
       diario: ['', Validators.required], 
       provedor: ['', Validators.required],
       cuentaContable: ['', Validators.required],
-      total: ['', [Validators.required, Validators.pattern(/^\d+(\.\d{1,2})?$/)]],
+      total: ['', [Validators.required, Validators.pattern(/^-?\d+(\.\d{1,2})?$/)]],
       conf_banco: ['', Validators.required]
     });
     this.opcionesDiarios = this.opcionesServices;
