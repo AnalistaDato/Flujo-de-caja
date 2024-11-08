@@ -19,7 +19,7 @@
             <button cButton color="info" variant="outline" (click)="openUploadModal()">
               <svg cIcon name="cilDataTransferUp" size="xl" title="Transfer Up"></svg>
             </button>
-            <button cButton color="success" variant="outline" (click)="openUploadModal()">
+            <button cButton color="success" variant="outline" (click)="openUploadModalMasivo()">
               <svg cIcon name="cilPlus" size="xl" title="Transfer Up"></svg>
             </button>
           </c-button-group>
@@ -40,6 +40,7 @@
               <th>Credito</th>
               <th>Socio</th>
               <th>Banco</th>
+              <th>Empresa</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -54,6 +55,7 @@
               <td>{{ item.credito | currency:'COP' }}</td>
               <td>{{ item.socio }}</td>
               <td>{{ item.banco }}</td>
+              <td>{{ item.empresa }}</td>
               <td>
               </td>
             </tr>
@@ -65,26 +67,53 @@
 </c-container>
 
 <!-- Modal para subir documento -->
-<c-modal id="uploadModal" [visible]="uploadModalVisible"
-  (visibleChange)="handleUploadModalChange($event)">
+<c-modal id="uploadModal" [visible]="uploadModalVisible" (visibleChange)="handleUploadModalChange($event)">
   <c-modal-header>
     <h5 cModalTitle>Subir documento</h5>
     <button (click)="closeUploadModal()" cButtonClose></button>
   </c-modal-header>
   <c-modal-body>
     <div>
-      <input aria-describedby="inputGroupFileAddon03"
-        aria-label="Upload"
-        cFormControl
-        id="inputGroupFile03"
-        type="file" accept=".csv, .xlsx" (change)="onFileSelected($event)"
-        name="file" />
+      <input aria-describedby="inputGroupFileAddon03" aria-label="Upload" cFormControl id="inputGroupFile03" type="file"
+        accept=".csv, .xlsx" (change)="onFileSelected($event)" name="file" />
       <p>{{ uploadMessage }}</p>
     </div>
   </c-modal-body>
   <c-modal-footer>
     <button (click)="onUpload()" cButton color="success">Subir</button>
-    <button (click)="closeUploadModal()" cButton
-      color="secondary">Cerrar</button>
+    <button (click)="closeUploadModal()" cButton color="secondary">Cerrar</button>
   </c-modal-footer>
 </c-modal>
+
+<!-- Modal para confirmar -->
+<c-modal id="ActdModal" [visible]="ActModalVisible" (visibleChange)="handleActModalChange($event)"
+  class="custom-modal-width">
+  <c-modal-header>
+    <h5 cModalTitle>Consolidación de facturas</h5>
+    <button (click)="closeActdModal()" cButtonClose></button>
+  </c-modal-header>
+  <c-modal-body>
+    <app-form-consolidacion></app-form-consolidacion>
+  </c-modal-body>
+</c-modal>
+
+<!-- Modal para subir documento Masivo -->
+<c-modal id="uploadModalMasivo" [visible]="uploadModalVisibleMasivo"
+  (visibleChange)="handleUploadModalChangeMasivo($event)">
+  <c-modal-header>
+    <h5 cModalTitle>Subir documento Masivo</h5>
+    <button (click)="closeUploadModalMasivo()" cButtonClose></button>
+  </c-modal-header>
+  <c-modal-body>
+    <div>
+      <input aria-describedby="inputGroupFileAddon03" aria-label="Upload" cFormControl id="inputGroupFile03" type="file"
+        accept=".csv, .xlsx" (change)="onFileSelectedMasivo($event)" name="file" />
+      <p>{{ uploadMessage }}</p>
+    </div>
+  </c-modal-body>
+  <c-modal-footer>
+    <button (click)="onUploadMasivo()" cButton color="success">Subir</button>
+    <button (click)="closeUploadModalMasivo()" cButton color="secondary">Cerrar</button>
+  </c-modal-footer>
+</c-modal>
+

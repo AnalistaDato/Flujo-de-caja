@@ -13,6 +13,7 @@ export interface FacturaConsolidada {
   credito: number;
   socio: string;
   banco: string;
+  empresa:string
 }
 
 @Injectable({

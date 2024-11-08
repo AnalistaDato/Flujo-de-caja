@@ -16,19 +16,14 @@
 
           <!-- Columna para los botones alineados a la derecha -->
           <c-col class="text-end">
-            <c-button-group aria-label="Basic mixed styles example"
-              role="group">
-              <button cButton color="info" variant="outline"
-                (click)="openUploadModal()">
-                <svg cIcon name="cilDataTransferUp" size="xl"
-                  title="Transfer Up"></svg>
+            <c-button-group aria-label="Basic mixed styles example" role="group">
+              <button cButton color="info" variant="outline" (click)="openUploadModal()">
+                <svg cIcon name="cilDataTransferUp" size="xl" title="Transfer Up"></svg>
               </button>
-              <button cButton color="success" variant="outline"
-              (click)="openCcModal()">
-              <svg cIcon name="cilDollar" size="xl" title="Plus"></svg>
-            </button>
-              <button cButton color="success" variant="outline"
-                (click)="openAddRecordModal()">
+              <button cButton color="success" variant="outline" (click)="openCcModal()">
+                <svg cIcon name="cilDollar" size="xl" title="Plus"></svg>
+              </button>
+              <button cButton color="success" variant="outline" (click)="openAddRecordModal()">
                 <svg cIcon name="cilPlus" size="xl" title="Plus"></svg>
               </button>
             </c-button-group>
@@ -37,8 +32,7 @@
       </div>
 
       <div class="table-responsive">
-        <table datatable [dtOptions]="dtOptions"
-          class="table table-striped table-bordered">
+        <table datatable [dtOptions]="dtOptions" class="table table-striped table-bordered">
           <thead>
             <tr>
               <th>ID</th>
@@ -80,8 +74,7 @@
 </c-container>
 
 <!-- Modal para agregar registro -->
-<c-modal id="addRecordModal" [visible]="addRecordModalVisible"
-  (visibleChange)="handleAddRecordModalChange($event)">
+<c-modal id="addRecordModal" [visible]="addRecordModalVisible" (visibleChange)="handleAddRecordModalChange($event)">
   <c-modal-header>
     <h5 cModalTitle>Agregar registro</h5>
     <button (click)="closeAddRecordModal()" cButtonClose></button>
@@ -90,15 +83,14 @@
     <app-form-event></app-form-event>
   </c-modal-body>
   <c-modal-footer>
-    <button (click)="closeAddRecordModal()" cButton
-      color="secondary" type="submit">Close</button>
+    <button (click)="closeAddRecordModal()" cButton color="secondary" type="submit">Close</button>
     <button cButton color="primary">Save changes</button>
   </c-modal-footer>
 </c-modal>
 
 <!-- Modal para confirmar -->
-<c-modal id="ActdModal" [visible]="ActModalVisible"
-  (visibleChange)="handleActModalChange($event)" class="custom-modal-width">
+<c-modal id="ActdModal" [visible]="ActModalVisible" (visibleChange)="handleActModalChange($event)"
+  class="custom-modal-width">
   <c-modal-header>
     <h5 cModalTitle>Consolidación de facturas</h5>
     <button (click)="closeActdModal()" cButtonClose></button>
@@ -109,52 +101,40 @@
 </c-modal>
 
 <!-- Modal para subir documento -->
-<c-modal id="uploadModal" [visible]="uploadModalVisible"
-  (visibleChange)="handleUploadModalChange($event)">
+<c-modal id="uploadModal" [visible]="uploadModalVisible" (visibleChange)="handleUploadModalChange($event)">
   <c-modal-header>
     <h5 cModalTitle>Subir documento</h5>
     <button (click)="closeUploadModal()" cButtonClose></button>
   </c-modal-header>
   <c-modal-body>
     <div>
-      <input aria-describedby="inputGroupFileAddon03"
-        aria-label="Upload"
-        cFormControl
-        id="inputGroupFile03"
-        type="file" accept=".csv, .xlsx" (change)="onFileSelected($event)"
-        name="file" />
+      <input aria-describedby="inputGroupFileAddon03" aria-label="Upload" cFormControl id="inputGroupFile03" type="file"
+        accept=".csv, .xlsx" (change)="onFileSelected($event)" name="file" />
       <p>{{ uploadMessage }}</p>
     </div>
   </c-modal-body>
   <c-modal-footer>
     <button (click)="onUpload()" cButton color="success">Subir</button>
-    <button (click)="closeUploadModal()" cButton
-      color="secondary">Cerrar</button>
+    <button (click)="closeUploadModal()" cButton color="secondary">Cerrar</button>
   </c-modal-footer>
 </c-modal>
 
 
 <!-- Modal para subir la cuenta contable -->
-<c-modal id="Cc" [visible]="CcModalVisible"
-  (visibleChange)="handleCcModalChange($event)">
+<c-modal id="Cc" [visible]="CcModalVisible" (visibleChange)="handleCcModalChange($event)">
   <c-modal-header>
     <h5 cModalTitle>Subir documento</h5>
     <button (click)="closeCcModal()" cButtonClose></button>
   </c-modal-header>
   <c-modal-body>
     <div>
-      <input aria-describedby="inputGroupFileAddon03"
-        aria-label="Upload"
-        cFormControl
-        id="inputGroupFile03"
-        type="file" accept=".csv, .xlsx" (change)="onFileSelected($event)"
-        name="file" />
+      <input aria-describedby="inputGroupFileAddon03" aria-label="Upload" cFormControl id="inputGroupFile03" type="file"
+        accept=".csv, .xlsx" (change)="onFileSelected($event)" name="file" />
       <p>{{ uploadMessage }}</p>
     </div>
   </c-modal-body>
   <c-modal-footer>
     <button (click)="onUploadCc()" cButton color="success">Subir</button>
-    <button (click)="closeCcModal()" cButton
-      color="secondary">Cerrar</button>
+    <button (click)="closeCcModal()" cButton color="secondary">Cerrar</button>
   </c-modal-footer>
 </c-modal>

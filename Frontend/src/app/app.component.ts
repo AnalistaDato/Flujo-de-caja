@@ -13,7 +13,7 @@ import { CommonModule } from '@angular/common';
   imports: [RouterOutlet,CommonModule]
 })
 export class AppComponent implements OnInit {
-  title = 'CoreUI Angular Admin Template';
+  title = 'Flujo de caja';
 
   constructor(
     private router: Router,

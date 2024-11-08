@@ -169,13 +169,7 @@ export class TablesComponent implements OnInit, OnDestroy {
       ],
       order: [[0, 'asc']],
       drawCallback: () => {
-        // Bind event handlers to dynamically generated buttons
-        document.querySelectorAll('.edit-btn').forEach((button) => {
-          button.addEventListener('click', (event: any) => {
-            const id = this.getRowDataId(event);
-            this.onEdit(id);
-          });
-        });
+      
 
         document.querySelectorAll('.inactivate-btn').forEach((button) => {
           button.addEventListener('click', (event: any) => {

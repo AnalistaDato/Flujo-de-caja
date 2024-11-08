@@ -31,11 +31,14 @@ import { FormEventComponent } from '../form-event/form-event.component';
 import { FormComponent } from '../form/form.component';
 import { FactrurasService } from '../../Services/factruras.service';
 import { FacturaConsolidada, FacturasDateService } from '../../Services/facturas-date.service';
+import { MasivoService } from '../../Services/masivo.service';
+import { FormConsolidacionComponent } from '../form-consolidacion/form-consolidacion.component';
 
 @Component({
   selector: 'app-facturas',
   standalone: true,
   imports: [
+    FormConsolidacionComponent,
     FormComponent,
     FormEventComponent,
     CommonModule,
@@ -74,15 +77,19 @@ export class FacturasComponent implements OnInit, OnDestroy {
 
   addRecordModalVisible: boolean = false;
   uploadModalVisible: boolean = false;
+  uploadModalVisibleMasivo: boolean = false;
   ActModalVisible: boolean = false;
   CcModalVisible: boolean = false;
   public selectedFile: File | null = null;
+  public selectedFileMasiva: File | null = null;
+  public uploadMessageMasivo: string = '';
   public uploadMessage: string = '';
   public showAlert: boolean = false;
 
   constructor(
     private facturasService: FactrurasService,
-    private facturas_dataService: FacturasDateService
+    private facturas_dataService: FacturasDateService,
+    private masivoService: MasivoService
   ) { }
 
   ngOnInit(): void {
@@ -137,6 +144,9 @@ export class FacturasComponent implements OnInit, OnDestroy {
           data: 'banco',
         },
         {
+          data: 'empresa',
+        },
+        {
           data: null,
           orderable: false,
           render: (data: any) => {
@@ -155,8 +165,24 @@ export class FacturasComponent implements OnInit, OnDestroy {
       ],
       order: [[0, 'asc']],
       drawCallback: () => {
+        document.querySelectorAll('.inactivate-btn').forEach((button) => {
+          button.addEventListener('click', (event: any) => {
+            const id = this.getRowDataId(event);
+            this.onInactivate(id);
+          });
+        });
+        document.querySelectorAll('.reschedule-btn').forEach((button) => {
+          button.addEventListener('click', (event: any) => {
+            const id = this.getRowDataId(event);
+            this.openActModal(id); // Open the modal when the check button is clicked
+          });
+        });
+
+
       }
+
     };
+
 
     this.dtTrigger.next();
   }
@@ -174,13 +200,31 @@ export class FacturasComponent implements OnInit, OnDestroy {
   openUploadModal(): void {
     this.uploadModalVisible = true;
   }
+  openUploadModalMasivo(): void {
+    this.uploadModalVisibleMasivo = true;
+  }
   closeUploadModal(): void {
     this.uploadModalVisible = false;
+  }
+  closeUploadModalMasivo(): void {
+    this.uploadModalVisibleMasivo = false;
   }
   handleUploadModalChange(visible: boolean): void {
     this.uploadModalVisible = visible;
     if (!visible) {
       this.uploadMessage = '';
+    }
+  }
+  handleUploadModalChangeMasivo(visible: boolean): void {
+    this.uploadModalVisibleMasivo = visible;
+    if (!visible) {
+      this.uploadMessage = '';
+    }
+  }
+  onFileSelectedMasivo(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFileMasiva = file;
     }
   }
   onFileSelected(event: any): void {
@@ -189,6 +233,10 @@ export class FacturasComponent implements OnInit, OnDestroy {
       this.selectedFile = file;
     }
   }
+  getRowDataId(event: any): number {
+    const id = event.currentTarget.getAttribute('data-id');
+    return parseInt(id, 10) || -1; // Provide a default value if 'id' is not found
+  }
 
   onUpload(): void {
     if (this.selectedFile) {
@@ -196,7 +244,80 @@ export class FacturasComponent implements OnInit, OnDestroy {
         next: (msg) => {
           this.uploadMessage = msg.message;
           this.showAlert = true;
-          
+
+        },
+        error: (err) => {
+          this.uploadMessage = 'Error de carga';
+          this.showAlert = true;
+          console.error('Error de carga', err);
+        }
+      });
+    }
+  }
+
+  openActModal(id: number): void {
+    // Llama al servicio para obtener la factura por ID
+    this.facturas_dataService.getFacturaById(id).subscribe({
+      next: (factura: FacturaConsolidada) => {
+        // Setea la factura seleccionada en el servicio
+        this.facturas_dataService.setSelectedFactura(factura);
+
+        // Abre el modal
+        this.ActModalVisible = true;
+      },
+      error: (err) => {
+        console.error('Error al obtener la factura:', err);
+      }
+    });
+  }
+  handleActModalChange(visible: boolean): void {
+    this.ActModalVisible = visible;
+    if (!visible) {
+      // Recargar los datos de la tabla cuando se cierre el modal de reprogramar
+      this.reloadTableData();
+    }
+  }
+  closeActdModal(): void {
+    this.ActModalVisible = false;
+
+  }
+
+
+  onInactivate(id: number): void {
+    if (id !== -1) {
+      const confirmed = window.confirm('¿Estás seguro de que deseas inactivar este registro? Esta acción no se puede deshacer.');
+
+      if (confirmed) {
+        console.log('Inactivar registro con ID:', id);
+
+        // Llamada al servicio para inactivar el registro
+        this.facturas_dataService.inactivateRecord(id).subscribe({
+          next: (response) => {
+            console.log('Factura inactivada con éxito:', response.message);
+            // Recargar los datos de la tabla después de inactivar
+          },
+          error: (error) => {
+            console.error('Error al inactivar la factura:', error);
+          }
+        });
+      } else {
+        console.log('Inactivación cancelada por el usuario.');
+      }
+    }
+    this.reloadTableData();
+  }
+
+  reloadTableData(): void {
+    this.dtTrigger.next();
+  }
+
+  onUploadMasivo(): void {
+    if (this.selectedFileMasiva) {
+      this.masivoService.uploadFile(this.selectedFileMasiva).subscribe({
+        next: (msg) => {
+          this.uploadMessageMasivo = msg.message;
+          this.showAlert = true;
+
         },
         error: (err) => {
           this.uploadMessage = 'Error de carga';

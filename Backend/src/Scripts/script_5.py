@@ -2,6 +2,7 @@ import pandas as pd
 from datetime import datetime
 import sys
 from db import get_engine
+import re
 
 engine = get_engine()
 
@@ -17,6 +18,21 @@ def process_file(file_path):
     df = df.dropna(how="all")
     df = df[df["Unnamed: 0"] != "Saldo inicial"]
     return df
+
+
+def identify_company(file_path):
+    # Extraer el nombre del archivo sin la extensión
+    file_name = file_path.split("/")[-1].split(".")[0]
+    # Normalizar el nombre (minúsculas) y buscar patrones
+    normalized_name = file_name.lower()
+
+    # Buscar patrones para determinar la empresa
+    if re.search(r"services", normalized_name):
+        return "services"
+    elif re.search(r"privada", normalized_name):
+        return "privada"
+
+    return None
 
 
 def validate_columns(df, required_columns):
@@ -179,8 +195,10 @@ def filter_accounts(df):
 
 def link_transactions(df):
     # Filtrar las filas donde "comunicacion" está vacío
-    df = df[pd.notnull(df["comunicacion"]) & (df["comunicacion"].str.strip() != "")]
-    
+    df = df[
+        pd.notnull(df["comunicacion"]) & (df["comunicacion"].str.strip() != "")
+    ].copy()
+
     # Si no hay filas para procesar, devolver df vacío
     if df.empty:
         print("No hay transacciones para procesar debido a la falta de comunicación.")
@@ -195,10 +213,7 @@ def link_transactions(df):
             if "BNK" in invoice:
                 continue
             for bnk_row in bnk_transactions.itertuples():
-                if (
-                    pd.notnull(bnk_row.comunicacion)
-                    and invoice in bnk_row.comunicacion
-                ):
+                if pd.notnull(bnk_row.comunicacion) and invoice in bnk_row.comunicacion:
                     related_invoices.append(bnk_row.factura)
         return list(set(related_invoices))
 
@@ -223,34 +238,26 @@ def link_transactions(df):
 
     return df
 
+    def assign_bank(related_invoices):
+        if not related_invoices:
+            return None
+        for invoice in related_invoices:
+            if invoice.startswith("BNK0"):
+                return "BANCOLOMBIA"
+            elif invoice.startswith("BNK01"):
+                return "BANCO CAJA SOCIAL S.A."
+            elif invoice.startswith("BNK2"):
+                return "BANCOLOMBIA"
+        return None
 
-def link_transactions(df):
-    # Filtrar las filas donde "comunicacion" está vacío y hacer una copia
-    df_filtered = df[pd.notnull(df["comunicacion"]) & (df["comunicacion"].str.strip() != "")].copy()
-    
-    # Si no hay filas para procesar, devolver df vacío
-    if df_filtered.empty:
-        print("No hay transacciones para procesar debido a la falta de comunicación.")
-        return df_filtered
+    df.loc[:, "banco"] = df["related_invoices"].apply(assign_bank)
 
-    bnk_transactions = df_filtered[df_filtered["factura"].str.startswith("BNK")].copy()
+    # Asignar "No asignado" a las filas sin banco relacionado
+    df.loc[:, "banco"] = df["banco"].fillna("No asignado")
 
-    def find_related_transactions(row):
-        related_invoices = []
-        comm_invoices = row["comunicacion"].split(" - ")
-        for invoice in comm_invoices:
-            if "BNK" in invoice:
-                continue
-            for bnk_row in bnk_transactions.itertuples():
-                if (
-                    pd.notnull(bnk_row.comunicacion)
-                    and invoice in bnk_row.comunicacion
-                ):
-                    related_invoices.append(bnk_row.factura)
-        return list(set(related_invoices))
+    return df
 
-    # Usar .loc para evitar SettingWithCopyWarning
-    df_filtered.loc[:, "related_invoices"] = df_filtered.apply(find_related_transactions, axis=1)
+    df["related_invoices"] = df.apply(find_related_transactions, axis=1)
 
     def assign_bank(related_invoices):
         if not related_invoices:
@@ -264,16 +271,29 @@ def link_transactions(df):
                 return "BANCOLOMBIA"
         return None
 
-    # Usar .loc para evitar SettingWithCopyWarning
-    df_filtered.loc[:, "banco"] = df_filtered["related_invoices"].apply(assign_bank)
+    df["banco"] = df["related_invoices"].apply(assign_bank)
 
     # Asignar "No asignado" a las filas sin banco relacionado
-    df_filtered.loc[:, "banco"] = df_filtered["banco"].fillna("No asignado")
+    df["banco"] = df["banco"].fillna("No asignado")
+    
+    df["estado"] = "consolidado"
 
-    return df_filtered
+
+    return df
+
 
 def process_and_store(df, table_name):
-    required_columns = ["factura", "fecha", "cuenta", "detalle", "debito", "credito","socio","banco"]
+    required_columns = [
+        "factura",
+        "fecha",
+        "cuenta",
+        "detalle",
+        "debito",
+        "credito",
+        "socio",
+        "banco",
+        "empresa",  # Asegúrate de incluir 'empresa' aquí
+    ]
     if all(col in df.columns for col in required_columns):
         current_time = datetime.now()
         df["created_at"] = current_time
@@ -333,9 +353,12 @@ def main(input_path):
     df = identif(df)
     df = select(columns, names, df)
     df = filter_accounts(df)
-     # Guardar el DataFrame procesado a un archivo Excel
-    output_file = "C:/Users/Analista De Datos/Desktop/Definitivo/Backend/consolidacion/output.xlsx"
+    # Agregar la columna empresa
+    df["empresa"] = identify_company(input_path)
     df = link_transactions(df)
+
+    # Guardar el DataFrame procesado a un archivo Excel
+    output_file = "C:/Users/Analista De Datos/Desktop/Definitivo/Backend/consolidacion/output.xlsx"
     df.to_excel(output_file, index=False)
     print(f"Datos guardados en: {output_file}")
     print(

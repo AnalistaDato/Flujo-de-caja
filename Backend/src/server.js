@@ -12,7 +12,8 @@ const consolidadoRoutes = require("./routes/consolidado.routes");
 const cuentasContablesRoutes = require("./routes/cuentas_contables.routes");
 const provedoresRoutes = require("./routes/provedores.routes");
 const facturasC = require("./routes/facturasC.routes");
-const facturasdata =  require("./routes/facturas_data")
+const facturasdata = require("./routes/facturas_data.routes");
+const masivo = require("./routes/masivo.routes");
 const cron = require("node-cron");
 const { PythonShell } = require("python-shell");
 const path = require("path"); // Importar el módulo path
@@ -44,8 +45,9 @@ app.use("/api", consolidadoRoutes); // Consulta de estractos para consolidación
 app.use("/api", cuentasContablesRoutes); // Consulta de estractos para consolidación
 app.use("/api", provedoresRoutes); // Consulta provedores
 app.use("/api", provedoresRoutes); // Consulta provedores
-app.use("/api",facturasC);
-app.use("/api",facturasdata)
+app.use("/api", facturasC);
+app.use("/api", facturasdata);
+app.use("/api", masivo);
 
 // Programar la tarea para ejecutar el script Python a medianoche
 cron.schedule("0 0 * * *", () => {
