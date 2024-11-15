@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from datetime import datetime
 import sys
 from db import get_engine
@@ -194,12 +195,10 @@ def filter_accounts(df):
 
 
 def link_transactions(df):
-    # Filtrar las filas donde "comunicacion" está vacío
     df = df[
         pd.notnull(df["comunicacion"]) & (df["comunicacion"].str.strip() != "")
     ].copy()
 
-    # Si no hay filas para procesar, devolver df vacío
     if df.empty:
         print("No hay transacciones para procesar debido a la falta de comunicación.")
         return df
@@ -207,21 +206,19 @@ def link_transactions(df):
     bnk_transactions = df[df["factura"].str.startswith("BNK")].copy()
 
     def find_related_transactions(row):
-        related_invoices = []
         comm_invoices = row["comunicacion"].split(" - ")
-        for invoice in comm_invoices:
-            if "BNK" in invoice:
-                continue
-            for bnk_row in bnk_transactions.itertuples():
-                if pd.notnull(bnk_row.comunicacion) and invoice in bnk_row.comunicacion:
-                    related_invoices.append(bnk_row.factura)
+        related_invoices = [
+            bnk_row.factura
+            for invoice in comm_invoices
+            if "BNK" not in invoice
+            for bnk_row in bnk_transactions.itertuples()
+            if pd.notnull(bnk_row.comunicacion) and invoice in bnk_row.comunicacion
+        ]
         return list(set(related_invoices))
 
     df["related_invoices"] = df.apply(find_related_transactions, axis=1)
 
     def assign_bank(related_invoices):
-        if not related_invoices:
-            return None
         for invoice in related_invoices:
             if invoice.startswith("BNK0"):
                 return "BANCOLOMBIA"
@@ -229,56 +226,55 @@ def link_transactions(df):
                 return "BANCO CAJA SOCIAL S.A."
             elif invoice.startswith("BNK2"):
                 return "BANCOLOMBIA"
-        return None
+        return "No asignado"
 
     df["banco"] = df["related_invoices"].apply(assign_bank)
-
-    # Asignar "No asignado" a las filas sin banco relacionado
-    df["banco"] = df["banco"].fillna("No asignado")
-
+    df["estado"] = "consolidado"  # Asegúrate de que esta columna se crea aquí
     return df
 
-    def assign_bank(related_invoices):
-        if not related_invoices:
-            return None
-        for invoice in related_invoices:
-            if invoice.startswith("BNK0"):
-                return "BANCOLOMBIA"
-            elif invoice.startswith("BNK01"):
-                return "BANCO CAJA SOCIAL S.A."
-            elif invoice.startswith("BNK2"):
-                return "BANCOLOMBIA"
-        return None
-
-    df.loc[:, "banco"] = df["related_invoices"].apply(assign_bank)
-
-    # Asignar "No asignado" a las filas sin banco relacionado
-    df.loc[:, "banco"] = df["banco"].fillna("No asignado")
-
-    return df
-
-    df["related_invoices"] = df.apply(find_related_transactions, axis=1)
-
-    def assign_bank(related_invoices):
-        if not related_invoices:
-            return None
-        for invoice in related_invoices:
-            if invoice.startswith("BNK0"):
-                return "BANCOLOMBIA"
-            elif invoice.startswith("BNK01"):
-                return "BANCO CAJA SOCIAL S.A."
-            elif invoice.startswith("BNK2"):
-                return "BANCOLOMBIA"
-        return None
-
-    df["banco"] = df["related_invoices"].apply(assign_bank)
-
-    # Asignar "No asignado" a las filas sin banco relacionado
-    df["banco"] = df["banco"].fillna("No asignado")
-    
-    df["estado"] = "consolidado"
 
 
+def process_and_store(df, table_name):
+    required_columns = [
+        "factura",
+        "fecha",
+        "cuenta",
+        "detalle",
+        "debito",
+        "credito",
+        "socio",
+        "banco",
+        "empresa",
+        "estado",  # Incluye 'estado' aquí
+    ]
+    if all(col in df.columns for col in required_columns):
+        current_time = datetime.now()
+        df["created_at"] = current_time
+        df["updated_at"] = current_time
+
+        # Prepara los datos para la inserción
+        data_to_insert = df[required_columns].copy()
+
+        try:
+            data_to_insert.to_sql(
+                table_name, con=engine, if_exists="append", index=False
+            )
+            print(f"Datos procesados y almacenados en la tabla '{table_name}'.")
+        except Exception as e:
+            print(f"Error al almacenar datos en la base de datos: {e}")
+    else:
+        print(f"Las columnas requeridas no se encuentran en el DataFrame: {df.columns}")
+
+
+def classify_transactions(df):
+    conditions = [
+        df["debito"].isna() & df["credito"].notna(),
+        df["credito"].isna() & df["debito"].notna(),
+    ]
+    choices = ["ingreso", "egreso"]
+
+    df["tipo_transaccion"] = np.select(conditions, choices, default="desconocido")
+    df = df[df["tipo_transaccion"] != "desconocido"]
     return df
 
 
@@ -292,31 +288,20 @@ def process_and_store(df, table_name):
         "credito",
         "socio",
         "banco",
-        "empresa",  # Asegúrate de incluir 'empresa' aquí
+        "empresa",
+        "estado",
+        "tipo_transaccion",
     ]
     if all(col in df.columns for col in required_columns):
         current_time = datetime.now()
         df["created_at"] = current_time
         df["updated_at"] = current_time
 
-        # Prepara los datos para la inserción
         data_to_insert = df[required_columns].copy()
 
-        # Imprimir el tamaño y el contenido del DataFrame que se va a insertar
-        print(
-            f"Tamaño del DataFrame a insertar: {data_to_insert.shape[0]} filas y {data_to_insert.shape[1]} columnas"
-        )
-        print(
-            data_to_insert.head()
-        )  # Imprimir las primeras filas para ver el contenido
-
-        # Almacenar los datos en la base de datos
         try:
             data_to_insert.to_sql(
-                table_name,
-                con=engine,
-                if_exists="append",
-                index=False,  # Quitar method="multi"
+                table_name, con=engine, if_exists="append", index=False
             )
             print(f"Datos procesados y almacenados en la tabla '{table_name}'.")
         except Exception as e:
@@ -346,26 +331,20 @@ def main(input_path):
         "comunicacion",
         "socio",
     ]
-
     table_name = "facturas_consolidadas"
 
     df = process_file(input_path)
     df = identif(df)
     df = select(columns, names, df)
     df = filter_accounts(df)
-    # Agregar la columna empresa
     df["empresa"] = identify_company(input_path)
     df = link_transactions(df)
+    df = classify_transactions(df)
 
-    # Guardar el DataFrame procesado a un archivo Excel
     output_file = "C:/Users/Analista De Datos/Desktop/Definitivo/Backend/consolidacion/output.xlsx"
-    df.to_excel(output_file, index=False)
-    print(f"Datos guardados en: {output_file}")
-    print(
-        f"Tamaño del DataFrame después de identif: {df.shape[0]} filas y {df.shape[1]} columnas"
-    )
+    with pd.ExcelWriter(output_file) as writer:
+        df.to_excel(writer, sheet_name="Transacciones", index=False)
 
-    # Llamada para almacenar los datos en la base de datos
     process_and_store(df, table_name)
 
 

@@ -8,20 +8,32 @@
 
 
     <form [formGroup]="form" cForm cRow class="needs-validation" ngNativeValidate (ngSubmit)="onSubmit()">
-        <!-- Fecha de Creación (Non-editable) -->
+
+        <!-- Fecha de creación (No editable) -->
         <c-col [md]="6" style="position: relative;">
-            <label cLabel for="fecha_creacion">Fecha de Creación</label>
-            <input matInput formControlName="fechaCreacion" cFormControl id="fecha_creacion" type="text"
-                style="width: 200px;" />
+            <label cLabel for="fecha">Fecha de creación</label>
+            <input matInput [matDatepicker]="picker1" formControlName="fecha" cFormControl
+                id="fecha" type="text" style="width: 200px;"
+                [value]="form.get('fecha')?.value" />
+            <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+            <mat-datepicker #picker1></mat-datepicker>
         </c-col>
 
         <!-- Fecha de Reprogramación (Editable) -->
         <c-col [md]="6" style="position: relative;">
-            <label cLabel for="fecha_reprogramacion">Reprogramación</label>
+            <label cLabel for="fecha_reprogramacion">Fecha de reprogramación</label>
             <input matInput [matDatepicker]="picker2" formControlName="fecha_reprogramacion" cFormControl
-                id="fecha_reprogramacion" type="text" style="width: 200px;" />
+                id="fecha_reprogramacion" type="text" style="width: 200px;"
+                [value]="form.get('fecha_reprogramacion')?.value" />
             <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
             <mat-datepicker #picker2></mat-datepicker>
+        </c-col>
+
+         <!-- Empresa (Non-editable) -->
+         <c-col [md]="6">
+            <label cLabel for="emrpesa">Empresa</label>
+            <input cFormControl id="empresa" formControlName="empresa" type="text" style="width: 200px;"
+                [value]="form.get('empresa')?.value" />
         </c-col>
 
         <!-- Saldo (Non-editable) -->
@@ -47,18 +59,6 @@
                 {{ getSaldoDiferencia() }} <!-- Muestra la diferencia -->
             </p>
         </c-col>
-
-        <!-- Select Banco -->
-        <c-col [md]="12">
-            <label cLabel for="conf_banco">Cuenta Bancaria</label>
-            <select cSelect cFormControl id="conf_banco" formControlName="conf_banco">
-                <option *ngFor="let cuenta of cuentas" [value]="cuenta.id">
-                    {{ cuenta.cuenta }} - {{ cuenta.banco }}
-                </option>
-            </select>
-        </c-col>
-
-
 
         <!-- Botón de Enviar -->
         <c-col [xs]="12">

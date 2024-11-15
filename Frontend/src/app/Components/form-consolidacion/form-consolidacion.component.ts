@@ -41,18 +41,24 @@ export class FormConsolidacionComponent {
   ngOnInit(): void {
     this.form = this.fb.group({
       nombre_socio: [],
-      fecha: [''],
+      fecha: [{value: '', disable: true}],
+      fecha_reprogramacion: [],
       detalle: [{ value: '', disabled: true }],
-      debito: ['', Validators.required],
-      credio: ['', Validators.required],
-      socio: ['', []],
-      banco: ['', []],
-      empresa: []
+      debito: [''],
+      credito: [''],
+      saldo: [0], // Inicializa saldo en 0 o en su valor por defecto
+      nuevo_pago: [0], // Añade nuevo_pago para evitar referencias null
+      diferencia: [0], // Añade diferencia para evitar referencias null
+      socio: [],
+      banco: [],
+      empresa: [],
+      conf_banco: [] // Añade conf_banco ya que es referenciado en onSubmit
     });
     this.facturadata_service.selectedFactura$.subscribe(factura => {
       if (factura) {
         this.facturaData = factura;
         this.setFormValues(factura);
+        this.setSaldo(); // Llama a la función que establece el saldo
       }
     });
 
@@ -63,12 +69,19 @@ export class FormConsolidacionComponent {
   setFormValues(factura: FacturaConsolidada): void {
     this.form.patchValue({
       nombre_socio: factura.socio,
-      fechaCreacion: factura.fecha,
-      fecha: factura.fecha || '',
+      fecha: factura.fecha ? new Date(factura.fecha) : null,  // Convierte a Date si no es null
+      fecha_reprogramacion: factura.fecha_reprogramacion ? new Date(factura.fecha_reprogramacion) : null,
       credito: factura.credito,
       debito: factura.debito,
       detalle: factura.detalle || '',
+      empresa: factura.empresa || '',
     });
+  }
+  setSaldo(): void {
+    const debito = this.form.get('debito')?.value || 0;
+    const credito = this.form.get('credito')?.value || 0;
+    const saldo = debito || credito; // Asigna el primer valor que no sea nulo
+    this.form.patchValue({ saldo }); // Establece saldo en el formulario
   }
   getSaldoDiferencia(): string {
     const saldo = this.form.get('saldo')?.value || 0;
@@ -94,10 +107,8 @@ export class FormConsolidacionComponent {
       // Extrae solo los campos necesarios para la actualización
       const updatedData = {
         id: Number(this.facturaData.id), // Asegúrate de incluir el ID de la factura
-        nombre_socio: this.form.get('nombre_socio')?.value,
         fecha_reprogramacion: this.form.get('fecha_reprogramacion')?.value,
         nuevo_pago: this.parseCurrency(this.form.get('nuevo_pago')?.value),
-        conf_banco: this.form.get('conf_banco')?.value,
         diferencia: this.form.get('diferencia')?.value
       };
 

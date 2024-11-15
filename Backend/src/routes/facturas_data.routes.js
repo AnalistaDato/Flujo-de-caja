@@ -5,15 +5,21 @@ const pool = require("../db");
 // Función para formatear la fecha
 function formatDate(date) {
   if (!date || date === "1969-12-31") return null;
+
+  // Verificar si la fecha es válida antes de intentar formatearl
   const d = new Date(date);
+
+  // Verificar si la conversión de la fecha fue exitosa
+  if (isNaN(d.getTime())) {
+    console.error("Fecha inválida:", date);
+    return null; // Si la fecha no es válida, devolver null
+  }
+
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
-  const hours = String(d.getHours()).padStart(2, "0");
-  const minutes = String(d.getMinutes()).padStart(2, "0");
-  const seconds = String(d.getSeconds()).padStart(2, "0");
 
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  return `${year}-${month}-${day}`;
 }
 
 router.get("/facturas", async (req, res) => {
@@ -55,6 +61,7 @@ router.get("/facturas", async (req, res) => {
           credito,
           socio,
           banco,
+          fecha_reprogramacion,
           empresa
         FROM facturas_consolidadas 
         WHERE estado != 'inactivo' OR estado is NULL
@@ -82,8 +89,7 @@ router.get("/facturas", async (req, res) => {
 
     const formattedRows = rows.map((row) => ({
       ...row,
-      fecha_factura: formatDate(row.fecha_factura),
-      fecha_vencimiento: formatDate(row.fecha_vencimiento),
+      fecha_factura: formatDate(row.fecha),
       fecha_reprogramacion: formatDate(row.fecha_reprogramacion),
     }));
 
@@ -126,18 +132,20 @@ router.get("/facturas/:id", async (req, res) => {
           credito,
           socio,
           banco,
+          fecha_reprogramacion,
           empresa
         FROM facturas_consolidadas
         WHERE id = ?
       `,
       [id]
     );
-
     if (rows.length > 0) {
       const factura = rows[0];
-      factura.fecha_factura = formatDate(factura.fecha_factura);
-      factura.fecha_vencimiento = formatDate(factura.fecha_vencimiento);
-      factura.fecha_reprogramacion = formatDate(factura.fecha_reprogramacion);
+      const formattedRow = {
+        ...factura,
+        fecha_factura: formatDate(factura.fecha),
+        fecha_reprogramacion: formatDate(factura.fecha_reprogramacion),
+      };
 
       res.json(factura);
     } else {
@@ -169,46 +177,26 @@ router.put("/facturas/:id/inactivate", async (req, res) => {
 
 router.put("/facturas/:id", async (req, res) => {
   const { id } = req.params;
-  const {
-    factura,
-    fecha,
-    cuenta,
-    detalle,
-    debito,
-    credito,
-    socio,
-    banco,
-    empresa,
-  } = req.body;
+  let { fecha_reprogramacion, nuevo_pago, diferencia } = req.body;
+
+  // Verificar si `fecha_reprogramacion` existe y formatearla a `YYYY-MM-DD`
+  if (fecha_reprogramacion) {
+    fecha_reprogramacion = new Date(fecha_reprogramacion)
+      .toISOString()
+      .split("T")[0];
+  }
 
   try {
     const query = `
-        UPDATE facturas_consolidadas
-        SET 
-          factura = ?,
-          fecha = ?,
-          cuenta = ?,
-          detalle = ?,
-          debito = ?,
-          credito = ?,
-          socio = ?,
-          banco = ?,
-          empresa = ?
-        WHERE id = ?
-      `;
+      UPDATE facturas_consolidadas
+      SET 
+        fecha_reprogramacion = ?,
+        nuevo_pago = ?,
+        diferencia = ?
+      WHERE id = ?
+    `;
 
-    const queryParams = [
-      factura,
-      fecha,
-      cuenta,
-      detalle,
-      debito,
-      credito,
-      socio,
-      banco,
-      empresa,
-      id,
-    ];
+    const queryParams = [fecha_reprogramacion, nuevo_pago, diferencia, id];
 
     const [result] = await pool.query(query, queryParams);
 
@@ -233,6 +221,7 @@ router.post("/facturas", async (req, res) => {
     credito,
     socio,
     banco,
+    fecha_reprogramacion,
     empresa,
   } = req.body;
 
@@ -247,8 +236,9 @@ router.post("/facturas", async (req, res) => {
           credito,
           socio,
           banco,
+          fecha_reprogramacion,
           empresa
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
     const queryParams = [
@@ -260,6 +250,7 @@ router.post("/facturas", async (req, res) => {
       credito,
       socio,
       banco,
+      fecha_reprogramacion,
       empresa,
     ];
 

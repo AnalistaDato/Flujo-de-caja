@@ -6,12 +6,12 @@ const db = require("../db"); // Asegúrate de que esta es la ruta correcta a tu 
 router.get("/events", async (req, res) => {
   const query = `SELECT 
                   id, 
-                  nombre_socio AS title,
-                  COALESCE(fecha_vencimiento, fecha_reprogramacion) AS start, 
-                  COALESCE(fecha_vencimiento, fecha_reprogramacion) AS end, 
-                  total AS description, 
-                  estado_pago AS status
-                FROM facturas`;
+                  detalle AS title,
+                  COALESCE(fecha_reprogramacion, fecha) AS start, 
+                  COALESCE(fecha_reprogramacion, fecha) AS end, 
+                  COALESCE(debito, credito) AS description, 
+                  estado AS status
+                FROM facturas_consolidadas`;
 
   try {
     const [results] = await db.query(query);

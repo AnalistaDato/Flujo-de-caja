@@ -1,0 +1,119 @@
+.mat-dialog-container {
+    z-index: 1000 !important; /* Asegúrate de que el modal tenga un z-index más bajo */
+  }
+
+  .mat-datepicker-toggle {
+    position: absolute; /* Asegúrate de que el icono esté posicionado correctamente */
+    right: 0; /* Alinea el icono a la derecha del contenedor */
+    top: 60%; /* Centra verticalmente */
+    transform: translateY(-50%); /* Ajusta el centro vertical del icono */
+    margin-left: 8px; /* Ajusta el espacio entre el icono y el borde del input */
+  }
+  
+  /* Opcional: Estilo del contenedor del input para asegurar que no se desborde */
+  .mat-form-field {
+    position: relative; /* Asegúrate de que el contenedor tenga un contexto de posicionamiento */
+  }
+
+  .c-col {
+    position: relative; /* Asegura que el contenedor tenga un contexto de posicionamiento */
+    padding-right: 40px; /* Agrega un espacio a la derecha para el icono del calendario */
+  }
+
+  .mat-input-element {
+    padding-right: 40px; /* Espacio suficiente para el icono del calendario */
+  }
+
+  .mat-form-field {
+    width: 100%; /* Asegúrate de que el input tenga suficiente ancho */
+  }
+  
+  .form-group {
+    margin-bottom: 20px; /* Ajusta este valor según sea necesario */
+  }
+  
+  /* Espacio específico para ciertos campos, si es necesario */
+  input, select {
+    margin-bottom: 15px; /* Espacio entre campos individuales */
+  }
+  
+  /* Espacio específico para los checkboxes */
+  .form-check {
+    margin-bottom: 15px;
+  }
+/* Estilos para el formulario */
+.form-control {
+  width: 100%;
+}
+
+.btn-primary {
+  margin-top: 10px;
+}
+
+/* Estilos para la tabla */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th, .table td {
+  padding: 8px;
+  text-align: left;
+}
+
+.table thead {
+  background-color: #f8f9fa;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: #f2f2f2;
+}
+
+.table-bordered {
+  border: 1px solid #dee2e6;
+}
+
+.table-bordered th, .table-bordered td {
+  border: 1px solid #dee2e6;
+}
+.text-success {
+  color: green;
+}
+
+.text-danger {
+  color: red;
+}
+/* Opcional: Estilo del contenedor del input para asegurar que no se desborde */
+.mat-form-field {
+  position: relative; /* Asegúrate de que el contenedor tenga un contexto de posicionamiento */
+}
+
+.c-col {
+  position: relative; /* Asegura que el contenedor tenga un contexto de posicionamiento */
+  padding-right: 40px; /* Agrega un espacio a la derecha para el icono del calendario */
+}
+
+.mat-input-element {
+  padding-right: 40px; /* Espacio suficiente para el icono del calendario */
+}
+
+.mat-form-field {
+  width: 100%; /* Asegúrate de que el input tenga suficiente ancho */
+}
+
+.form-group {
+  margin-bottom: 20px; /* Ajusta este valor según sea necesario */
+}
+
+/* Espacio específico para ciertos campos, si es necesario */
+input, select {
+  margin-bottom: 15px; /* Espacio entre campos individuales */
+}
+
+/* Espacio específico para los checkboxes */
+.form-check {
+  margin-bottom: 15px;
+}
+.mat-dialog-container {
+  z-index: 1000 !important; /* Asegúrate de que el modal tenga un z-index más bajo */
+}

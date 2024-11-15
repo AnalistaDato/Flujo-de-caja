@@ -30,6 +30,7 @@ import {
 import { TablesComponent } from '../tables/tables.component';
 import { DataService } from '../../Services/data.service';
 import { CuentasContablesService } from '../../Services/cuentas-contables.service';
+import { FormConsolidacionComponent } from "../form-consolidacion/form-consolidacion.component";
 
 
 
@@ -47,7 +48,7 @@ import { CuentasContablesService } from '../../Services/cuentas-contables.servic
     GridModule,
     InputGroupComponent,
     RowComponent,
-    ThemeDirective, ButtonCloseDirective, ButtonDirective, ModalBodyComponent, ModalTitleDirective, ModalFooterComponent, ModalHeaderComponent, ModalComponent, FormEventComponent, CommonModule, RouterOutlet, FullCalendarModule],
+    ThemeDirective, ButtonCloseDirective, ButtonDirective, ModalBodyComponent, ModalTitleDirective, ModalFooterComponent, ModalHeaderComponent, ModalComponent, FormEventComponent, CommonModule, RouterOutlet, FullCalendarModule, FormConsolidacionComponent],
   templateUrl: './calendar.component.html',
   styleUrls: ['./calendar.component.css']
 })

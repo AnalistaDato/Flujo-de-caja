@@ -2,11 +2,13 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, catchError, throwError } from 'rxjs';
 import { Factura } from './data.service';
+import { map } from 'rxjs/operators';
 
 export interface FacturaConsolidada {
   id: number;
   factura: string;
-  fecha: string;
+  fecha: Date | null; // Cambiado de string a Date | null
+  fecha_reprogramacion: Date | null; // Cambiado de string a Date | null
   cuenta: string;
   detalle: string;
   debito: number;
@@ -31,16 +33,29 @@ export class FacturasDateService {
   getDatos(params: HttpParams): Observable<any> {
     return this.http.get<any>(this.apiUrl, { params })
       .pipe(
+        map(response => ({
+          ...response,
+          data: response.data.map((factura: FacturaConsolidada) => ({
+            ...factura,
+            fecha: factura.fecha ? new Date(factura.fecha) : null,
+            fecha_reprogramacion: factura.fecha_reprogramacion ? new Date(factura.fecha_reprogramacion) : null
+          }))
+        })),
         catchError(error => {
           console.error('Error al obtener los datos:', error);
           return throwError(error);
         })
       );
   }
-
+  
   getFacturaById(id: number): Observable<FacturaConsolidada> {
     return this.http.get<FacturaConsolidada>(`${this.apiUrl}/${id}`)
       .pipe(
+        map(factura => ({
+          ...factura,
+          fecha: factura.fecha ? new Date(factura.fecha) : null,
+          fecha_reprogramacion: factura.fecha_reprogramacion ? new Date(factura.fecha_reprogramacion) : null
+        })),
         catchError(error => {
           console.error(`Error al obtener la factura con ID ${id}:`, error);
           return throwError(error);

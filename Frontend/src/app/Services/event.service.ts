@@ -44,14 +44,10 @@ export class EventService {
 
   private getBackgroundColorByStatus(status: string): string {
     switch (status) {
-      case 'Pagado':
+      case 'consolidado':
         return '#d4edda'; // Light green
-      case 'Pagado Parcialmente':
+      case 'proyectado':
         return '#fff3cd'; // Light yellow
-      case 'No pagadas':
-        return '#f8d7da'; // Light red
-      case 'Revertido':
-        return '#ffe5b4'; // Light orange
       default:
         return '#e2e3e5'; // Light gray for default
     }
@@ -59,14 +55,10 @@ export class EventService {
 
   private getBorderColorByStatus(status: string): string {
     switch (status) {
-      case 'Pagado':
+      case 'consolidado':
         return '#28a745'; // Green
-      case 'Pagado Parcialmente':
+      case 'proyectado':
         return '#ffc107'; // Yellow
-      case 'No pagadas':
-        return '#dc3545'; // Red
-      case 'Revertido':
-        return '#fd7e14'; // Orange
       default:
         return '#6c757d'; // Gray for default
     }
@@ -74,10 +66,8 @@ export class EventService {
 
   private getTextColorByStatus(status: string): string {
     switch (status) {
-      case 'Pagado':
-      case 'Pagado Parcialmente':
-      case 'No pagadas':
-      case 'Revertido':
+      case 'consolidado':
+      case 'proyectado':
         return '#000000'; // Black text for visibility on light backgrounds
       default:
         return '#343a40'; // Dark gray text for default
