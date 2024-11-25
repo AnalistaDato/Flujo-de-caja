@@ -19,22 +19,29 @@ def process_file(file_path):
     # Eliminar espacios en blanco de los nombres de las columnas
     df.columns = df.columns.str.strip()
 
-    # Clasificar transacciones según las columnas 'debito' y 'credito'
+    # Asegurarse de que 'debito' y 'credito' sean de tipo string antes de eliminar comas
+    df['debito'] = df['debito'].astype(str).str.replace(',', '').apply(pd.to_numeric, errors='coerce').fillna(0)
+    df['credito'] = df['credito'].astype(str).str.replace(',', '').apply(pd.to_numeric, errors='coerce').fillna(0)
+
+    # Clasificar transacciones según las reglas de pasivo
     df["tipo_transaccion"] = df.apply(
-        lambda row: (
-            "ingreso"
-            if pd.notnull(row.get("credito")) and pd.isnull(row.get("debito"))
-            else (
-                "egreso"
-                if pd.notnull(row.get("debito")) and pd.isnull(row.get("credito"))
-                else "otro"
-            )
-        ),
+        lambda row: "ingreso" if row["credito"] > 0 and row["debito"] == 0
+        else ("egreso" if row["debito"] > 0 and row["credito"] == 0 else "otro"),
         axis=1,
     )
+    
+    
+
+    # Agregar la columna 'banco' con valor por defecto 'sin banco'
+    df['banco'] = 'sin banco'
+
+    # Establecer un estado por defecto
     df["estado"] = "proyectado"
 
     return df
+
+
+
 
 
 def save_to_database(df, table_name):

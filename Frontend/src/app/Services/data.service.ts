@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -17,7 +17,7 @@ export interface Factura {
   importe_adeudado: number;
   estado_pago: string;
   estado_g: string;
-  estado: string;
+  estado:string;
   fecha_reprogramacion: string;
   created_at: string;
   conf_banco: string;
@@ -40,8 +40,19 @@ export class DataService {
 
   constructor(private http: HttpClient) { }
 
+  // Helper function to get headers with Authorization authToken
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('authToken');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return headers;
+  }
+
   getDatos(params: HttpParams): Observable<any> {
-    return this.http.get<any>(this.apiUrl, { params })
+    const headers = this.getAuthHeaders(); // Obtén las cabeceras con el token
+    return this.http.get<any>(this.apiUrl, { params, headers }) // Asegúrate de pasar las cabeceras
       .pipe(
         catchError(error => {
           console.error('Error al obtener los datos:', error);

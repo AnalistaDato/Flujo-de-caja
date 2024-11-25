@@ -20,10 +20,17 @@ export class LoginComponent {
   constructor(private authService: AuthService, private Router: Router) {}
 
   login(): void {
+    console.log('Iniciando sesión con', this.username, this.password);
     this.authService.login(this.username, this.password).subscribe({
-      next: () => this.Router.navigate(['/calendario']),
-      error: (err) => console.error('Acceso restringido', err)
-    })
+      next: () => {
+        console.log('Redirigiendo a calendario...');
+        this.Router.navigate(['/calendario']);
+      },
+      error: (err) => {
+        console.error('Acceso restringido', err);
+        alert('Error al intentar iniciar sesión. Verifica las credenciales y la conexión.');
+      }
+    });
   }
  
 }

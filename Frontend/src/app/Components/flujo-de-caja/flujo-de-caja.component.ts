@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FlujoService } from '../../Services/flujo.service';
 import { DaySummary } from '../../Services/flujo.service';
 
 
@@ -13,7 +12,7 @@ import { DaySummary } from '../../Services/flujo.service';
   templateUrl: './flujo-de-caja.component.html',
   styleUrls: ['./flujo-de-caja.component.css']
 })
-export class FlujoDeCajaComponent implements OnInit {
+export class FlujoDeCajaComponent  {
 
   daySummaries: DaySummary[] = [];
   selectedYear!: number;
@@ -21,23 +20,6 @@ export class FlujoDeCajaComponent implements OnInit {
   
 
 
-  constructor(private flujoService: FlujoService) { }
-
-  ngOnInit(): void {
-    this.selectedYear = new Date().getFullYear();
-    this.selectedMonth = new Date().getMonth() + 1;
-    this.cargarDatos();
-  }
-
-  cargarDatos(): void {
-    this.flujoService.getDaySummaries(this.selectedMonth, this.selectedYear)
-      .subscribe(summaries => {
-        this.daySummaries = summaries;
-      });
-  }
-
-  onMonthChange(): void {
-    this.cargarDatos();
-  }
+  constructor() { }
 
 }

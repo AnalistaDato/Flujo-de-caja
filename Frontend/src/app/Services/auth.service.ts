@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import * as jwt_decode from 'jwt-decode';  // Correct import
+import { Router } from '@angular/router';
+import jwt_decode from 'jwt-decode';
 
 @Injectable({
   providedIn: 'root'
@@ -21,12 +21,7 @@ export class AuthService {
         if (response.token) {
           console.log('Token saved:', response.token);
           this.setToken(response.token);
-          this.router.navigate(['/dashboard']);
         }
-      }),
-      catchError(err => {
-        console.error('Error de autenticación', err);
-        return throwError('Credenciales incorrectas');
       })
     );
   }
@@ -46,10 +41,11 @@ export class AuthService {
     }
     try {
       const decoded: any = jwt_decode(token);  // Correct usage of jwt_decode
-      const exp = decoded.exp * 1000;
+      const exp = decoded.exp * 1000;  // Token expiration in milliseconds
       return Date.now() < exp;
-    } catch {
-      return false;
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return false;  // In case of decoding failure, return false
     }
   }
 

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { EventInput } from '@fullcalendar/core';
@@ -20,27 +20,45 @@ export interface BackendEvent {
 export class EventService {
   private apiUrl = 'http://localhost:3000/api/events';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
+
+  // Helper function to get headers with Authorization authToken
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('authToken');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return headers;
+  }
 
   getEvents(): Observable<EventInput[]> {
-    return this.http.get<BackendEvent[]>(this.apiUrl).pipe(
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      throw new Error('Token no encontrado');
+    }
+  
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+  
+    return this.http.get<BackendEvent[]>(this.apiUrl, { headers }).pipe(
       map(events =>
         events.map(event => ({
           id: event.id?.toString() || '',
           title: event.title,
-          start: event.start ?? undefined,  // Asegúrate de que las fechas están en formato ISO
+          start: event.start ?? undefined,
           end: event.end ?? undefined,
           backgroundColor: this.getBackgroundColorByStatus(event.status),
           borderColor: this.getBorderColorByStatus(event.status),
           textColor: this.getTextColorByStatus(event.status),
           extendedProps: {
-            description: event.description || 'No description',
-            status: event.status || 'No status',
-          }
+            description: event.description || 'Sin descripción',
+            status: event.status || 'Sin estado',
+          },
         }))
       )
     );
   }
+  
 
   private getBackgroundColorByStatus(status: string): string {
     switch (status) {
@@ -74,4 +92,3 @@ export class EventService {
     }
   }
 }
-  

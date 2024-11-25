@@ -27,9 +27,6 @@ import {
   RowComponent,
   ThemeDirective, ModalBodyComponent, ModalComponent, ModalTitleDirective, ModalFooterComponent, ModalHeaderComponent,
 } from '@coreui/angular';
-import { TablesComponent } from '../tables/tables.component';
-import { DataService } from '../../Services/data.service';
-import { CuentasContablesService } from '../../Services/cuentas-contables.service';
 import { FormConsolidacionComponent } from "../form-consolidacion/form-consolidacion.component";
 
 
@@ -95,22 +92,17 @@ export class CalendarComponent implements OnInit {
   ngOnInit(): void {
     this.loadEvents();
   }
-
+  
   loadEvents() {
-    this.eventService.getEvents().subscribe((events) => {
-      // Transform the events to match the EventInput format
-      this.calendarOptions.update((options) => ({
+    this.eventService.getEvents().subscribe(events => {
+      this.calendarOptions.update(options => ({
         ...options,
-        events: events.map(event => ({
-          ...event,
-          extendedProps: {
-            ...event.extendedProps,
-            description: this.formatCurrency(event.extendedProps?.["description"])
-          }
-        }))
+        events: events // Actualiza la propiedad 'events' correctamente
       }));
     });
   }
+  
+
 
   handleCalendarToggle() {
     this.calendarVisible.update((bool) => !bool);
@@ -122,9 +114,6 @@ export class CalendarComponent implements OnInit {
       weekends: !options.weekends,
     }));
   }
-
- 
-  
 
   handleDateSelect(selectInfo: DateSelectArg) {
 

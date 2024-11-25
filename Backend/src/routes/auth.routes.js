@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const pool = require('../db'); // Usa el pool de conexiones
 
-const SECRET_KEY = '1234';
+const SECRET_KEY = '1234'; // Cambia esta clave por una más segura en producción
 
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
@@ -27,12 +27,18 @@ router.post('/login', async (req, res) => {
     }
 
     // Generar un token JWT
-    const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
-    res.json({ token });
+    const token = jwt.sign(
+      { id: user.id, username: user.username },
+      SECRET_KEY,
+      { expiresIn: '01h' }  // 24 horas de expiración
+    );    
+
+    // Enviar el token como respuesta
+    return res.status(200).json({ token });
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Error en la base de datos' });
+    return res.status(500).json({ message: 'Error en la base de datos' });
   }
 });
 

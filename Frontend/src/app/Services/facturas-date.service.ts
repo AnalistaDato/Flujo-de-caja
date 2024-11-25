@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, catchError, throwError } from 'rxjs';
 import { Factura } from './data.service';
@@ -30,8 +30,20 @@ export class FacturasDateService {
 
   constructor(private http: HttpClient) { }
 
+   // Helper function to get headers with Authorization authToken
+   private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('authToken');
+    console.log("Token:", token); // Verifica que el token exista
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    return headers;
+  }
+
   getDatos(params: HttpParams): Observable<any> {
-    return this.http.get<any>(this.apiUrl, { params })
+    const headers = this.getAuthHeaders(); // Obtén las cabeceras con el token
+    return this.http.get<any>(this.apiUrl, { params, headers  })
       .pipe(
         map(response => ({
           ...response,
@@ -49,7 +61,8 @@ export class FacturasDateService {
   }
   
   getFacturaById(id: number): Observable<FacturaConsolidada> {
-    return this.http.get<FacturaConsolidada>(`${this.apiUrl}/${id}`)
+    const headers = this.getAuthHeaders(); // Obtén las cabeceras con el token
+    return this.http.get<FacturaConsolidada>(`${this.apiUrl}/${id}`, { headers })
       .pipe(
         map(factura => ({
           ...factura,
@@ -63,7 +76,8 @@ export class FacturasDateService {
       );
   }
   editRecord(id: number, data: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, data)
+    const headers = this.getAuthHeaders(); // Obtén las cabeceras con el token
+    return this.http.put<any>(`${this.apiUrl}/${id}`, data, { headers })
       .pipe(
         catchError(error => {
           console.error(`Error al editar la factura con ID ${id}:`, error);
@@ -71,9 +85,10 @@ export class FacturasDateService {
         })
       );
   }
-
+  
   inactivateRecord(id: number): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}/inactivate`, {})
+    const headers = this.getAuthHeaders(); // Obtén las cabeceras con el token
+    return this.http.put<any>(`${this.apiUrl}/${id}/inactivate`, {}, { headers })
       .pipe(
         catchError(error => {
           console.error(`Error al inactivar la factura con ID ${id}:`, error);

@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../db"); // Asegúrate de que esta es la ruta correcta a tu archivo de conexión a la base de datos
+const db = require("../db"); // Ruta a la conexión de base de datos
 
-// Ruta para obtener los eventos
+// Ruta para obtener eventos
 router.get("/events", async (req, res) => {
+  // Consulta para obtener los eventos
   const query = `SELECT 
                   id, 
                   detalle AS title,
@@ -15,9 +16,9 @@ router.get("/events", async (req, res) => {
 
   try {
     const [results] = await db.query(query);
-    res.json(results);
+    return res.json(results); // Termina la ejecución aquí si todo sale bien
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message }); // Termina aquí en caso de error
   }
 });
 
