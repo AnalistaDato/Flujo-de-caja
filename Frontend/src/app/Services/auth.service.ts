@@ -10,7 +10,7 @@ import jwt_decode from 'jwt-decode';
 })
 export class AuthService {
 
-  private LOGIN_URL = "http://localhost:3000/api/auth/login";
+  private LOGIN_URL = "http://caja.securicol.com.co/api/auth/login";
   private tokenKey = 'authToken';
 
   constructor(private httpClient: HttpClient, private router: Router) { }
