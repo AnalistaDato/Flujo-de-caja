@@ -12,7 +12,7 @@ const port = process.env.PORT || 3000;
 // Configuración de CORS
 app.use(
   cors({
-    origin: "http://localhost:4200",
+    origin: "http://caja.securicol.com.co",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
