@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from '@environments/environment';
 
 export interface Factura {
   id: number;
@@ -32,7 +33,7 @@ export interface Factura {
   providedIn: 'root'
 })
 export class DataService {
-  private apiUrl = 'http://localhost:3000/api/datos/datos';
+  private apiUrl = `${environment.apiBaseUrl}/datos/datos`;
 
   // BehaviorSubject to store the selected factura
   private selectedFacturaSubject = new BehaviorSubject<Factura | null>(null);

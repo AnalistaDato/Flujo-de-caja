@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '@environments/environment';
 
 
 export interface Extracto {
@@ -17,7 +18,7 @@ export interface Extracto {
 })
 export class ConsolidadoService {
 
-  private apiUrl = 'http://localhost:3000/api/consolidado';
+  private apiUrl = `${environment.apiBaseUrl}/consolidado`;
 
   constructor(private http: HttpClient) { }
 

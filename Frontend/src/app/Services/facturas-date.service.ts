@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, catchError, throwError } from 'rxjs';
 import { Factura } from './data.service';
 import { map } from 'rxjs/operators';
+import { environment } from '@environments/environment';
 
 export interface FacturaConsolidada {
   id: number;
@@ -22,7 +23,7 @@ export interface FacturaConsolidada {
   providedIn: 'root'
 })
 export class FacturasDateService {
-  private apiUrl = 'http://localhost:3000/api/facturas';
+  private apiUrl = `${environment.apiBaseUrl}/facturas`;
 
   // BehaviorSubject to store the selected factura
   private selectedFacturaSubject = new BehaviorSubject<FacturaConsolidada | null>(null);

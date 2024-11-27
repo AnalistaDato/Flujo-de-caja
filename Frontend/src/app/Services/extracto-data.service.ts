@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '@environments/environment';
 
 export interface Factura {
   fecha: string;
@@ -15,7 +16,7 @@ export interface Factura {
   providedIn: 'root'
 })
 export class ExtractoDataService {
-  private apiUrl = 'http://localhost:3000/api/datos/data_extracto';
+  private apiUrl = `${environment.apiBaseUrl}/datos/data_extracto`;
 
   constructor(private http: HttpClient) { }
 

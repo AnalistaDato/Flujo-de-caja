@@ -1,6 +1,7 @@
 import { HttpClient, HttpErrorResponse, HttpEvent, HttpEventType, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, Observable, of } from 'rxjs';
+import { environment } from '@environments/environment';
 
 export interface provedores {
   id: string;
@@ -15,7 +16,7 @@ export interface provedores {
 })
 export class ProvedoresService {
 
-  private PROVEDORES_URL = 'http://localhost:3000/api/provedores'
+  private PROVEDORES_URL = `${environment.apiBaseUrl}/provedores`
 
   constructor(private http: HttpClient) { }
 

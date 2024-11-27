@@ -1,6 +1,7 @@
 import { HttpClient, HttpErrorResponse, HttpEvent, HttpEventType, HttpHeaders, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, map, Observable, of } from 'rxjs';
+import { environment } from '@environments/environment';
 
 export interface cuentasContables {
   id: number;
@@ -13,7 +14,7 @@ export interface cuentasContables {
 })
 export class CuentasContablesService {
 
-  private readonly UPLOAD_URL = 'http://localhost:3000/api/cuentas_contables';
+  private readonly UPLOAD_URL = `${environment.apiBaseUrl}/cuentas_contables`;
 
   constructor(private http: HttpClient) {}
 

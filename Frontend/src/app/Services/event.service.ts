@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { EventInput } from '@fullcalendar/core';
+import { environment } from '@environments/environment';
 
 // Define la interfaz para los datos de eventos del backend
 export interface BackendEvent {
@@ -18,7 +19,7 @@ export interface BackendEvent {
   providedIn: 'root'
 })
 export class EventService {
-  private apiUrl = 'http://localhost:3000/api/events';
+  private apiUrl = `${environment.apiBaseUrl}/events`;
 
   constructor(private http: HttpClient) { }
 

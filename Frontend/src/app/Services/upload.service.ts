@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpEvent, HttpEventType, HttpRequest } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { environment } from '@environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UploadService {
-  private UPLOAD_URL = 'http://localhost:3000/api/upload';
+  private UPLOAD_URL = `${environment.apiBaseUrl}/upload`;
 
   constructor(private http: HttpClient) { }
 

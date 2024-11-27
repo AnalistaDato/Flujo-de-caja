@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '@environments/environment';
 
 export interface Cuenta {
   id: string;
@@ -15,7 +16,7 @@ export interface Cuenta {
 })
 export class CuentasService {
 
-  private apiUrl = 'http://localhost:3000/api/cuentas';
+  private apiUrl = `${environment.apiBaseUrl}/cuentas`;
 
   constructor(private http: HttpClient) { }
 

@@ -1,12 +1,13 @@
 import { HttpClient, HttpEvent, HttpEventType, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, map, Observable, of } from 'rxjs';
+import { environment } from '@environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FactrurasService {
-  private UPLOAD_URL = 'http://localhost:3000/api/consolidacion';
+  private UPLOAD_URL = `${environment.apiBaseUrl}/consolidacion`;
 
   constructor(private http: HttpClient) { }
 

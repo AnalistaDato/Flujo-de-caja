@@ -4,13 +4,15 @@ import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import jwt_decode from 'jwt-decode';
+import { environment } from '@environments/environment';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  private LOGIN_URL = "http://caja.securicol.com.co/api/auth/login";
+  private LOGIN_URL = `${environment.apiBaseUrl}/auth/login`;
   private tokenKey = 'authToken';
 
   constructor(private httpClient: HttpClient, private router: Router) { }
