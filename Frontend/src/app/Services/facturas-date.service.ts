@@ -3,8 +3,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, catchError, throwError } from 'rxjs';
 import { Factura } from './data.service';
 import { map } from 'rxjs/operators';
-import { environment } from '@environments/environment';
-
+import { environment } from '../../environments/environment';
 export interface FacturaConsolidada {
   id: number;
   factura: string;

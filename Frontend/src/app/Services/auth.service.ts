@@ -4,10 +4,10 @@ import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import jwt_decode from 'jwt-decode';
-import { environment } from '@environments/environment';
+import { environment } from '../../environments/environment';
 
 
-@Injectable({
+@Injectable({ 
   providedIn: 'root'
 })
 export class AuthService {

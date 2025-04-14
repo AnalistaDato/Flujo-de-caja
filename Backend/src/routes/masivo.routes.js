@@ -24,7 +24,7 @@ const fileFilter = (_req, file, cb) => {
     cb(null, true);
   } else {
     cb(
-      new Error("Invalid file type. Only CSV and XLSX files are allowed."),
+      new Error("Tipo de archivo invalido. Solo los archivos CSV y XLSX estan permitidos."),
       false
     );
   }
@@ -34,10 +34,14 @@ const upload = multer({ storage, fileFilter });
 
 // Route to upload and process a file
 router.post("/masivo", upload.single("file"), (req, res) => {
+  // Check if a file is uploaded
   if (!req.file) {
-    return res
-      .status(400)
-      .json({ message: "No file uploaded or invalid file type." });
+    return res.status(400).json({
+      status: "error",
+      body: {
+        message: "Archivo no encontrado o de tipo incorrecto.",
+      },
+    });
   }
 
   const filePath = req.file.path;
@@ -51,28 +55,35 @@ router.post("/masivo", upload.single("file"), (req, res) => {
   exec(command, (error, stdout, stderr) => {
     if (error) {
       console.error(`Error al ejecutar el script: ${error.message}`);
-      return res
-        .status(500)
-        .json({
+      return res.status(500).json({
+        status: "error",
+        body: {
           message: "Error ejecutando el script de Python.",
           error: error.message,
-        });
+        },
+      });
     }
-
+    
     if (stderr) {
       console.error(`Error en la ejecución del script: ${stderr}`);
-      return res
-        .status(500)
-        .json({
+      return res.status(500).json({
+        status: "error",
+        body: {
           message: "Error en la ejecución del script de Python.",
           error: stderr,
-        });
+        },
+      });
     }
 
+    // Asegúrate de que no haya salida intermedia que cause eventos desconocidos
     console.log(`Salida del script: ${stdout}`);
-    res.json({
-      message:
-        "File uploaded, processed, and Python script executed successfully.",
+    
+    // Responder solo cuando todo haya finalizado correctamente
+    return res.json({
+      status: "success",
+      body: {
+        message: "Archivo subido y script ejecutado correctamente.",
+      },
     });
   });
 });

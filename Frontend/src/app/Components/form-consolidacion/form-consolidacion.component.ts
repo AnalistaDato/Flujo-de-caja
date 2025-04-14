@@ -20,11 +20,11 @@ import { FacturaConsolidada, FacturasDateService } from '../../Services/facturas
 @Component({
   selector: 'app-form-consolidacion',
   standalone: true,
-  imports: [NgStyle, MatDatepickerModule, MatNativeDateModule,
-    DropdownModule, CommonModule, FormsModule, ReactiveFormsModule, GridModule, RowComponent, ColComponent, TextColorDirective, CardComponent, CardHeaderComponent, CardBodyComponent,
-    FormDirective, FormLabelDirective, FormControlDirective, FormFeedbackComponent, InputGroupComponent, InputGroupTextDirective,
-    FormSelectDirective, FormCheckComponent, FormCheckInputDirective, FormCheckLabelDirective, ButtonDirective, ListGroupDirective, ListGroupItemDirective,
-    CardGroupComponent, ContainerComponent, IconDirective, IconModule],
+  imports: [MatDatepickerModule, MatNativeDateModule,
+    DropdownModule, CommonModule, FormsModule, ReactiveFormsModule, GridModule, ColComponent, TextColorDirective, CardComponent, CardHeaderComponent, CardBodyComponent,
+    FormDirective, FormLabelDirective, FormControlDirective,
+    ButtonDirective,
+    IconModule],
   templateUrl: './form-consolidacion.component.html',
   styleUrl: './form-consolidacion.component.css'
 })

@@ -29,7 +29,7 @@ const fileFilter = (_req, file, cb) => {
 // Route to upload and process a file
 router.post('/consolidacion', upload.single('file'), (req, res) => {
     if (!req.file) {
-      return res.status(400).json({ message: 'No file uploaded or invalid file type.' });
+      return res.status(400).json({ message: 'Archivo no subido o con un formato invalido.' });
     }
   
     const filePath = req.file.path;
@@ -52,7 +52,7 @@ exec(command, (error, stdout, stderr) => {
   }
 
   console.log(`Salida del script: ${stdout}`);
-  res.json({ message: 'File uploaded, processed, and Python script executed successfully.' });
+  res.json({ message: 'Archivo subido con exito' });
 });
 });
 

@@ -9,13 +9,8 @@ import {
   ButtonGroupComponent,
   ColComponent,
   ContainerComponent,
-  FormCheckComponent,
-  FormCheckInputDirective,
   FormControlDirective,
-  FormDirective,
-  FormSelectDirective,
   GridModule,
-  InputGroupComponent,
   ModalBodyComponent,
   ModalComponent,
   ModalFooterComponent,
@@ -27,8 +22,6 @@ import {
 import { IconModule, IconDirective } from '@coreui/icons-angular';
 import { Config } from 'datatables.net-bs5';
 import { HttpParams } from '@angular/common/http';
-import { FormEventComponent } from '../form-event/form-event.component';
-import { FormComponent } from '../form/form.component';
 import { FactrurasService } from '../../Services/factruras.service';
 import { FacturaConsolidada, FacturasDateService } from '../../Services/facturas-date.service';
 import { MasivoService } from '../../Services/masivo.service';
@@ -39,19 +32,12 @@ import { FormConsolidacionComponent } from '../form-consolidacion/form-consolida
   standalone: true,
   imports: [
     FormConsolidacionComponent,
-    FormComponent,
-    FormEventComponent,
     CommonModule,
     DataTablesModule,
     AlertComponent,
-    FormCheckComponent,
-    FormCheckInputDirective,
     ColComponent,
     FormControlDirective,
-    InputGroupComponent,
-    FormSelectDirective,
     RowComponent,
-    FormDirective,
     ModalComponent,
     ModalHeaderComponent,
     ModalTitleDirective,
@@ -151,14 +137,14 @@ export class FacturasComponent implements OnInit, OnDestroy {
           orderable: false,
           render: (data: any) => {
             return `
-          <div class="btn-group" role="group">
+            <div class="btn-group" role="group">
               <button type="button" class="btn btn-success btn-sm reschedule-btn" title="Reprogramar" data-id="${data.id}">
-                  <i class="cil-check"></i> 
+                <i class="cil-check"></i> 
               </button>
               <button type="button" class="btn btn-danger btn-sm inactivate-btn" title="Inactivar" data-id="${data.id}">
-                  <i class="cil-ban"></i> 
+                <i class="cil-ban"></i> 
               </button>
-          </div>
+            </div>
             `;
           }
         }
@@ -169,23 +155,22 @@ export class FacturasComponent implements OnInit, OnDestroy {
           button.addEventListener('click', (event: any) => {
             const id = this.getRowDataId(event);
             this.onInactivate(id);
+            this.reloadTableData();  // Recargar la tabla después de inactivar
           });
         });
         document.querySelectorAll('.reschedule-btn').forEach((button) => {
           button.addEventListener('click', (event: any) => {
             const id = this.getRowDataId(event);
             this.openActModal(id); // Open the modal when the check button is clicked
+            this.reloadTableData();  // Recargar la tabla después de reprogramar
           });
         });
-
-
       }
-
     };
-
 
     this.dtTrigger.next();
   }
+
   formatCurrency(value: number): string {
     return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value);
   }
@@ -205,9 +190,11 @@ export class FacturasComponent implements OnInit, OnDestroy {
   }
   closeUploadModal(): void {
     this.uploadModalVisible = false;
+    this.reloadTableData();
   }
   closeUploadModalMasivo(): void {
     this.uploadModalVisibleMasivo = false;
+
   }
   handleUploadModalChange(visible: boolean): void {
     this.uploadModalVisible = visible;
@@ -242,9 +229,15 @@ export class FacturasComponent implements OnInit, OnDestroy {
     if (this.selectedFile) {
       this.facturasService.uploadFile(this.selectedFile).subscribe({
         next: (msg) => {
-          this.uploadMessage = msg.message;
-          this.showAlert = true;
-
+          if (msg.message === 'File uploaded, processed, and Python script executed successfully.') {
+            this.uploadMessage = msg.message;
+            this.showAlert = true;
+            this.closeUploadModal(); // Cierra el modal si el mensaje es exitoso
+            this.reloadTableData(); // Recargar la tabla después de la carga exitosa
+          } else {
+            this.uploadMessage = 'Hubo un problema con el procesamiento del archivo.';
+            this.showAlert = true;
+          }
         },
         error: (err) => {
           this.uploadMessage = 'Error de carga';
@@ -254,6 +247,7 @@ export class FacturasComponent implements OnInit, OnDestroy {
       });
     }
   }
+  
 
   openActModal(id: number): void {
     // Llama al servicio para obtener la factura por ID
@@ -273,8 +267,7 @@ export class FacturasComponent implements OnInit, OnDestroy {
   handleActModalChange(visible: boolean): void {
     this.ActModalVisible = visible;
     if (!visible) {
-      // Recargar los datos de la tabla cuando se cierre el modal de reprogramar
-      this.reloadTableData();
+      this.reloadTableData(); // Recargar tabla cuando se cierre el modal
     }
   }
   closeActdModal(): void {
@@ -288,44 +281,57 @@ export class FacturasComponent implements OnInit, OnDestroy {
       const confirmed = window.confirm('¿Estás seguro de que deseas inactivar este registro? Esta acción no se puede deshacer.');
 
       if (confirmed) {
-        console.log('Inactivar registro con ID:', id);
-
-        // Llamada al servicio para inactivar el registro
         this.facturas_dataService.inactivateRecord(id).subscribe({
           next: (response) => {
             console.log('Factura inactivada con éxito:', response.message);
-            // Recargar los datos de la tabla después de inactivar
+            this.reloadTableData(); // Recargar tabla después de éxito
           },
           error: (error) => {
             console.error('Error al inactivar la factura:', error);
           }
         });
-      } else {
-        console.log('Inactivación cancelada por el usuario.');
       }
     }
-    this.reloadTableData();
   }
 
   reloadTableData(): void {
-    this.dtTrigger.next();
+    this.dtTrigger.unsubscribe(); // Elimina la suscripción anterior
+    this.dtTrigger = new Subject<void>(); // Crea una nueva instancia
+    this.dtTrigger.next(); // Vuelve a lanzar el evento para recargar la tabla
   }
 
   onUploadMasivo(): void {
     if (this.selectedFileMasiva) {
+      this.uploadMessageMasivo = '';  // Limpiar el mensaje antes de la carga
+      this.showAlert = false;  // Ocultar la alerta antes de procesar
+  
       this.masivoService.uploadFile(this.selectedFileMasiva).subscribe({
-        next: (msg) => {
-          this.uploadMessageMasivo = msg.message;
-          this.showAlert = true;
-
+        next: (response) => {
+          console.log('Mensaje recibido desde el backend:', response);
+  
+          if (response.status === 'success') {
+            if (response.body && response.body.message) {
+              this.uploadMessageMasivo = response.body.message;  // Mensaje de éxito
+              this.showAlert = true;  // Mostrar alerta de éxito
+              this.closeUploadModalMasivo();  // Cierra el modal
+              this.reloadTableData();  // Recargar la tabla si necesario
+            } else {
+              this.uploadMessageMasivo = 'Respuesta incompleta del backend.';
+              this.showAlert = true;
+            }
+          } else {
+            // Evento desconocido, puede ser útil manejarlo con un mensaje específico
+            this.uploadMessageMasivo = response.body?.message || 'Evento desconocido';  
+            this.showAlert = true;
+          }
         },
         error: (err) => {
-          this.uploadMessage = 'Error de carga';
+          this.uploadMessageMasivo = err?.error?.message || 'Hubo un problema con el procesamiento del archivo.';  // Usar el mensaje de error del backend
           this.showAlert = true;
           console.error('Error de carga', err);
         }
       });
     }
   }
-
+  
 }

@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse, HttpEvent, HttpEventType, HttpHeaders, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, map, Observable, of } from 'rxjs';
-import { environment } from '@environments/environment';
+import { environment } from '../../environments/environment';
 
 export interface cuentasContables {
   id: number;

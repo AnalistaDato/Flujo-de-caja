@@ -1,4 +1,4 @@
 export const environment = {
     production: true,
-    apiBaseUrl: 'http://caja.securicol.com.co/api',
+    apiBaseUrl: 'http://localhost:3000/api',
 };

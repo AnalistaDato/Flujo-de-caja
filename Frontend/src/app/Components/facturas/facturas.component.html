@@ -98,6 +98,7 @@
 </c-modal>
 
 <!-- Modal para subir documento Masivo -->
+<!-- Modal para subir documento Masivo -->
 <c-modal id="uploadModalMasivo" [visible]="uploadModalVisibleMasivo"
   (visibleChange)="handleUploadModalChangeMasivo($event)">
   <c-modal-header>
@@ -108,7 +109,8 @@
     <div>
       <input aria-describedby="inputGroupFileAddon03" aria-label="Upload" cFormControl id="inputGroupFile03" type="file"
         accept=".csv, .xlsx" (change)="onFileSelectedMasivo($event)" name="file" />
-      <p>{{ uploadMessage }}</p>
+      <!-- Mensaje actualizado -->
+      <p>{{ uploadMessageMasivo }}</p>
     </div>
   </c-modal-body>
   <c-modal-footer>
@@ -117,3 +119,7 @@
   </c-modal-footer>
 </c-modal>
 
+<!-- Alert message for success or error (masivo) -->
+<div *ngIf="showAlert" class="alert" [ngClass]="{'alert-success': uploadMessageMasivo.includes('correctamente'), 'alert-danger': uploadMessageMasivo.includes('Error') }">
+  {{ uploadMessageMasivo }}
+</div>

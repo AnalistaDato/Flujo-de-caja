@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { environment } from '@environments/environment';
+import { environment } from '../../environments/environment';
 
 export interface Factura {
   id: number;

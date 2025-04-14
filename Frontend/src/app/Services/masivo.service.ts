@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpEvent, HttpEventType, HttpRequest, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { environment } from '@environments/environment';
+import { environment } from '@environments/environment.prod';
 
 @Injectable({
   providedIn: 'root',
@@ -24,21 +24,21 @@ export class MasivoService {
   uploadFile(file: File): Observable<any> {
     const formData: FormData = new FormData();
     formData.append('file', file, file.name);
-
+  
     const headers = this.getAuthHeaders(); // Obtener los encabezados de autenticación
-
+  
     const req = new HttpRequest('POST', this.UPLOAD_URL, formData, {
       reportProgress: true,
       responseType: 'json',
       headers: headers, // Añadir los encabezados a la solicitud
     });
-
+  
     return this.http.request(req).pipe(
-      map((event) => this.getEventMessage(event, file)),
+      map((event) => this.getEventMessage(event, file)),  // Procesar los eventos
       catchError(this.handleError(file))
     );
   }
-
+  
   private getEventMessage(event: HttpEvent<any>, file: File): any {
     switch (event.type) {
       case HttpEventType.UploadProgress:
@@ -48,6 +48,7 @@ export class MasivoService {
         }
         return { status: 'progress', message: 'La carga está en proceso' };
       case HttpEventType.Response:
+        console.log('Respuesta del backend:', event.body);  // Imprimir respuesta del backend para depuración
         return {
           status: 'success',
           message: 'Archivo subido correctamente',
@@ -57,7 +58,7 @@ export class MasivoService {
         return { status: 'unknown', message: `Evento desconocido: ${event.type}` };
     }
   }
-
+  
   private handleError(file: File) {
     return (error: any): Observable<any> => {
       console.error('Error registrado:', error);
