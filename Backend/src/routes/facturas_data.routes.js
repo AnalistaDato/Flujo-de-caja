@@ -22,9 +22,10 @@ function formatDate(date) {
   return `${year}-${month}-${day}`;
 }
 
+
 router.get("/facturas", async (req, res) => {
   try {
-    const { draw, start, length, search, order, columns } = req.query;
+    const { draw, start, length, search, order, columns,all } = req.query;
 
     const drawInt = parseInt(draw, 10) || 1;
     const startInt = parseInt(start, 10) || 0;
@@ -57,14 +58,16 @@ router.get("/facturas", async (req, res) => {
           fecha,
           cuenta,
           detalle,
+          comunicacion,
           debito,
           credito,
           socio,
           banco,
           fecha_reprogramacion,
+          estado,
           empresa
         FROM facturas_consolidadas 
-        WHERE estado != 'inactivo' OR estado is NULL
+        WHERE estado NOT IN ('inactivo', 'proyectado')
         ORDER BY ${columnsParams[orderParams[0].column]?.data || "factura"} ${
       orderParams[0].dir
     }
@@ -76,7 +79,7 @@ router.get("/facturas", async (req, res) => {
     if (searchValue) {
       query = query.replace(
         "WHERE",
-        `WHERE (id LIKE ? OR facturas_consolidadas LIKE ? OR cuenta LIKE ?) AND`
+        `WHERE (id LIKE ? OR factura LIKE ? OR cuenta LIKE ?) AND`
       );
       queryParams.unshift(
         `%${searchValue}%`,
@@ -94,7 +97,7 @@ router.get("/facturas", async (req, res) => {
     }));
 
     const [totalRows] = await pool.query(
-      "SELECT COUNT(*) AS count FROM facturas_consolidadas WHERE estado != 'inactivo' OR estado is NULL"
+      "SELECT COUNT(*) AS count FROM facturas_consolidadas WHERE estado NOT IN ('inactivo', 'proyectado')"
     );
     const recordsTotal = totalRows[0].count;
 
@@ -120,23 +123,25 @@ router.get("/facturas/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const [rows] = await pool.query(
-      `
+    const [rows] = await pool.query(`
+      
         SELECT 
           id,
           factura,
           fecha,
           cuenta,
           detalle,
+          comunicacion,
           debito,
           credito,
           socio,
           banco,
           fecha_reprogramacion,
+          estado,
           empresa
         FROM facturas_consolidadas
-        WHERE id = ?
-      `,
+        WHERE id = ?`
+      ,
       [id]
     );
     if (rows.length > 0) {
@@ -161,7 +166,7 @@ router.put("/facturas/:id/inactivate", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const query = `UPDATE facturas_consolidadas SET estado = 'inactivo' WHERE id = ?`;
+    const query = `UPDATE facturas_consolidadas SET estado = 'inactivo' WHERE id = ?;`
     const [result] = await pool.query(query, [id]);
 
     if (result.affectedRows > 0) {
@@ -179,7 +184,7 @@ router.put("/facturas/:id", async (req, res) => {
   const { id } = req.params;
   let { fecha_reprogramacion, nuevo_pago, diferencia } = req.body;
 
-  // Verificar si `fecha_reprogramacion` existe y formatearla a `YYYY-MM-DD`
+  // Verificar si fecha_reprogramacion existe y formatearla a YYYY-MM-DD
   if (fecha_reprogramacion) {
     fecha_reprogramacion = new Date(fecha_reprogramacion)
       .toISOString()
@@ -194,7 +199,8 @@ router.put("/facturas/:id", async (req, res) => {
         nuevo_pago = ?,
         diferencia = ?
       WHERE id = ?
-    `;
+      `
+    ;
 
     const queryParams = [fecha_reprogramacion, nuevo_pago, diferencia, id];
 
@@ -217,6 +223,7 @@ router.post("/facturas", async (req, res) => {
     fecha,
     cuenta,
     detalle,
+    comunicacion,
     debito,
     credito,
     socio,
@@ -232,20 +239,23 @@ router.post("/facturas", async (req, res) => {
           fecha,
           cuenta,
           detalle,
+          comunicacion,
           debito,
           credito,
           socio,
           banco,
           fecha_reprogramacion,
           empresa
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `;
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         `
+      ;
 
     const queryParams = [
       factura,
       fecha,
       cuenta,
       detalle,
+      comunicacion,
       debito,
       credito,
       socio,

@@ -1,0 +1,15 @@
+/* Limitar el ancho de la columna Comunicación */
+td.text-start, th.text-start {
+    max-width: 200px;  /* Ajusta según necesites */
+    white-space: nowrap; /* Evita saltos de línea */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Muestra "..." cuando el texto es demasiado largo */
+  }
+
+  
+  td.text-start, th.text-start {
+    max-width: 200px;
+    word-wrap: break-word;
+    white-space: normal;
+  }
+  

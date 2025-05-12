@@ -48,7 +48,6 @@ import { FormConsolidacionComponent } from '../form-consolidacion/form-consolida
     IconModule,
     ButtonGroupComponent,
     ButtonDirective,
-    ContainerComponent,
     GridModule,
     IconDirective
   ],
@@ -113,8 +112,13 @@ export class FacturasComponent implements OnInit, OnDestroy {
           data: 'fecha',
           render: (data: string) => this.formatDate(data) // Format date
         },
+        {
+          data: 'fecha_reprogramacion',
+          render: (data: string) => this.formatDate(data) // Format date
+        },
         { data: 'cuenta' },
         { data: 'detalle' },
+        { data: 'comunicacion' },
         {
           data: 'debito',
           render: (data: number) => this.formatCurrency(data) // Format currency
@@ -128,6 +132,9 @@ export class FacturasComponent implements OnInit, OnDestroy {
         },
         {
           data: 'banco',
+        },
+        {
+          data: 'estado'
         },
         {
           data: 'empresa',
@@ -158,6 +165,8 @@ export class FacturasComponent implements OnInit, OnDestroy {
             this.reloadTableData();  // Recargar la tabla después de inactivar
           });
         });
+
+        // Manejamos también el editar de adicionar si es necesario
         document.querySelectorAll('.reschedule-btn').forEach((button) => {
           button.addEventListener('click', (event: any) => {
             const id = this.getRowDataId(event);
@@ -226,6 +235,7 @@ export class FacturasComponent implements OnInit, OnDestroy {
   }
 
   onUpload(): void {
+    console.log(localStorage.getItem('authToken'));
     if (this.selectedFile) {
       this.facturasService.uploadFile(this.selectedFile).subscribe({
         next: (msg) => {
@@ -247,7 +257,7 @@ export class FacturasComponent implements OnInit, OnDestroy {
       });
     }
   }
-  
+
 
   openActModal(id: number): void {
     // Llama al servicio para obtener la factura por ID
@@ -304,11 +314,11 @@ export class FacturasComponent implements OnInit, OnDestroy {
     if (this.selectedFileMasiva) {
       this.uploadMessageMasivo = '';  // Limpiar el mensaje antes de la carga
       this.showAlert = false;  // Ocultar la alerta antes de procesar
-  
+
       this.masivoService.uploadFile(this.selectedFileMasiva).subscribe({
         next: (response) => {
           console.log('Mensaje recibido desde el backend:', response);
-  
+
           if (response.status === 'success') {
             if (response.body && response.body.message) {
               this.uploadMessageMasivo = response.body.message;  // Mensaje de éxito
@@ -321,7 +331,7 @@ export class FacturasComponent implements OnInit, OnDestroy {
             }
           } else {
             // Evento desconocido, puede ser útil manejarlo con un mensaje específico
-            this.uploadMessageMasivo = response.body?.message || 'Evento desconocido';  
+            this.uploadMessageMasivo = response.body?.message || 'Evento desconocido';
             this.showAlert = true;
           }
         },
@@ -333,5 +343,5 @@ export class FacturasComponent implements OnInit, OnDestroy {
       });
     }
   }
-  
+
 }

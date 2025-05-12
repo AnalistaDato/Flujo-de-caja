@@ -1,0 +1,50 @@
+<div class="bg-light dark:bg-transparent min-vh-100 d-flex flex-row align-items-center justify-content-center">
+  <c-container breakpoint="md">
+    <c-row class="justify-content-center w-100">
+      <c-col xs="12" sm="8" md="6" lg="5">
+        <c-card-group>
+          <c-card class="p-4">
+            <c-card-body>
+              <h1 class="text-center">Securicol</h1>
+              <p class="text-body-secondary text-center">Recuperar Contraseña</p>
+
+              <!-- Mensaje de éxito o error -->
+              <div *ngIf="message" class="alert alert-info text-center">
+                {{ message }}
+              </div>
+
+              <form [formGroup]="forgotForm" (ngSubmit)="onSubmit()">
+                <c-input-group class="mb-3">
+                  <span cInputGroupText>
+                    <svg cIcon name="cilEnvelopeClosed"></svg>
+                  </span>
+                  <input 
+                    id="email" 
+                    type="email" 
+                    cFormControl 
+                    placeholder="Introduce tu correo" 
+                    formControlName="email" 
+                    required 
+                    [ngClass]="{'is-invalid': forgotForm.get('email')?.invalid && forgotForm.get('email')?.touched}" />
+                </c-input-group>
+
+                <c-row>
+                  <c-col xs="6">
+                    <button cButton class="px-4 w-100 btn-custom" type="submit" [disabled]="forgotForm.invalid">
+                      Enviar
+                    </button>
+                  </c-col>
+                  <c-col class="text-right" xs="6">
+                    <button cButton class="px-0" color="link" [routerLink]="['/login']">
+                      Volver al inicio
+                    </button>
+                  </c-col>
+                </c-row>
+              </form>
+            </c-card-body>
+          </c-card>
+        </c-card-group>
+      </c-col>
+    </c-row>
+  </c-container>
+</div>

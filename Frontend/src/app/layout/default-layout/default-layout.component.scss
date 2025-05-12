@@ -1,4 +1,8 @@
+$header-height: 60px;
+$footer-height: 40px;
+
 :host {
+  // Estilos para el scrollbar (los que ya tienes)
   .ng-scrollbar {
     --scrollbar-padding: 1px;
     --scrollbar-size: 5px;
@@ -6,19 +10,27 @@
     --scrollbar-thumb-hover-color: var(--cui-gray-400, #999);
     --scrollbar-hover-size: calc(var(--scrollbar-size) * 1.5);
   }
+
+ 
+  c-container {
+    width: calc(100% - 20px) !important;
+    max-width: calc(100% - 20px) !important;
+    overflow: auto; // Asegura que el contenido se ajuste correctamente
+  }
+
 }
 
-// ng-scrollbar css variables
-//.cui-scrollbar {
-//  --scrollbar-border-radius: 7px;
-//  --scrollbar-padding: 1px;
-//  --scrollbar-viewport-margin: 0;
-//  --scrollbar-track-color: transparent;
-//  --scrollbar-wrapper-color: transparent;
-//  --scrollbar-thumb-color: rgba(0, 0, 0, 0.2);
-//  --scrollbar-thumb-hover-color: var(--scrollbar-thumb-color);
-//  --scrollbar-size: 5px;
-//  --scrollbar-hover-size: var(--scrollbar-size);
-//  --scrollbar-thumb-transition: height ease-out 150ms, width ease-out 150ms;
-//  --scrollbar-track-transition: height ease-out 150ms, width ease-out 150ms;
-//}
+ ng-scrollbar css variables
+.cui-scrollbar {
+  --scrollbar-border-radius: 7px;
+  --scrollbar-padding: 1px;
+  --scrollbar-viewport-margin: 0;
+  --scrollbar-track-color: transparent;
+  --scrollbar-wrapper-color: transparent;
+    --scrollbar-thumb-color: rgba(0, 0, 0, 0.2);
+ --scrollbar-thumb-hover-color: var(--scrollbar-thumb-color);
+  --scrollbar-size: 5px;
+  --scrollbar-hover-size: var(--scrollbar-size);
+  --scrollbar-thumb-transition: height ease-out 150ms, width ease-out 150ms;
+  --scrollbar-track-transition: height ease-out 150ms, width ease-out 150ms;
+}

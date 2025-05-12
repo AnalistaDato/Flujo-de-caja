@@ -1,26 +1,11 @@
 import { INavData } from '@coreui/angular';
 
 export const navItems: INavData[] = [
-  {
-    name: 'Calendario',
-    url: '/calendario',
-    iconComponent: { name: 'cil-calendar' }
-  },
+
   {
     name: 'Flujo de caja',
-    iconComponent: { name: 'cil-cash' },
+    iconComponent: { name: 'cil-bar-chart' },
     url: '/flujo_de_caja'
-  },
-  {
-    name: 'Extracto',
-    iconComponent: { name: 'cil-bank' },
-    url: '/extracto'
-  },
-  {
-    name: 'Tabla',
-    url: '/tabla',
-    linkProps: { fragment: 'headings' },
-    iconComponent: { name: 'cil-list' }
   },
   {
     name: 'Facturas Consolidadas',
@@ -29,8 +14,30 @@ export const navItems: INavData[] = [
     iconComponent: { name: 'cil-check' }
   },
   {
+    name: 'Facturas Pendientes',
+    url: '/tabla',
+    linkProps: { fragment: 'headings' },
+    iconComponent: { name: 'cil-cash' }
+  },
+  {
+    name: 'Proyecciones',
+    url: '/proyectaods',
+    linkProps: { fragment: 'headings' },
+    iconComponent: { name: 'cilChartLine' }
+  },
+  {
+    name: 'Calendario',
+    url: '/calendario',
+    iconComponent: { name: 'cil-calendar' }
+  },
+  {
+    name: 'Extracto',
+    iconComponent: { name: 'cil-bank' },
+    url: '/extracto'
+  },
+  {
     name: 'Usuarios',
     iconComponent: { name: 'cil-user' },
-    url: '/register'
+    url: '/usuarios'
   }
     ]

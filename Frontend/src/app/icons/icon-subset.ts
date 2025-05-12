@@ -1,4 +1,5 @@
 import {
+  cilChartLine,
   cilBank,
   cibCcAmex,
   cibCcApplePay,
@@ -33,6 +34,7 @@ import {
   cilCalendar,
   cilChart,
   cilChartPie,
+  cilBarChart,
   cilCheck,
   cilChevronLeft,
   cilChevronRight,
@@ -105,6 +107,7 @@ import { signet } from './signet';
 import { logo } from './logo';
 
 export const iconSubset = {
+  cilChartLine,
   cilBank,
   cilCash,
   cilContact,
@@ -141,6 +144,7 @@ export const iconSubset = {
   cilCalendar,
   cilChart,
   cilChartPie,
+  cilBarChart,
   cilCheck,
   cilChevronLeft,
   cilChevronRight,
@@ -210,6 +214,7 @@ export const iconSubset = {
 };
 
 export enum IconSubset {
+  cilChartLine = 'cilChartLine',
   cilBank = 'cilBank',
   cilCash= 'cilCash',
   cibContact = 'cibContact',
@@ -246,6 +251,7 @@ export enum IconSubset {
   cilCalendar = 'cilCalendar',
   cilChart = 'cilChart',
   cilChartPie = 'cilChartPie',
+  cilBarChart = 'cilBarChart',
   cilCheck = 'cilCheck',
   cilChevronLeft = 'cilChevronLeft',
   cilChevronRight = 'cilChevronRight',

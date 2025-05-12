@@ -1,0 +1,29 @@
+.btn-custom {
+    background-color: #840707 !important;
+    color: white !important;
+    border: none;
+  }
+  
+  .btn-custom:hover {
+    background-color: #6b0505 !important;
+  }
+  .is-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 5px rgba(220, 53, 69, 0.5);
+  }
+  
+  .alert {
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 5px;
+  }
+  
+  .btn-custom {
+    background-color: #840707 !important;
+    color: white !important;
+    border: none;
+  }
+  
+  .btn-custom:hover {
+    background-color: #6b0505 !important;
+  }

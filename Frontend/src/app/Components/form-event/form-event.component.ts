@@ -173,7 +173,7 @@ export class FormEventComponent implements OnInit {
         impuestos: this.form.get('total')?.value,
         total: this.form.get('total')?.value,
         total_en_divisa: this.form.get('total')?.value,
-        importe_adeudado: 0,  // Ajusta según tu lógica
+        importe_adeudado_sin_signo: 0,  // Ajusta según tu lógica
         estado_pago: 'pendiente',  // Ajusta según el estado que manejes
         estado_g: 'proyectado',   // Puedes cambiar esto según la lógica de negocio
         fecha_reprogramacion: '',  // Si tienes esta información

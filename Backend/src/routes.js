@@ -13,10 +13,18 @@ const provedoresRoutes = require("./routes/provedores.routes");
 const facturasC = require("./routes/facturasC.routes");
 const facturasdata = require("./routes/facturas_data.routes");
 const masivo = require("./routes/masivo.routes");
+const restablecer = require("./routes/forgot_password.routes");
+const register = require("./routes/register.routes");
+const users = require("./routes/users.routes");
+const all = require("./routes/allFactures.routes");
+const proyectado = require("./routes/proyectado.routes");
 
 module.exports = (app) => {
-  app.use("/api/auth", authRoutes); 
-  app.use("/api", authGuard,uploadRoutes);
+  app.use("/api/auth", authRoutes);
+  app.use("/api", restablecer);
+  app.use("/api", register);
+  app.use("/api",authGuard, all);
+  app.use("/api", authGuard, uploadRoutes);
   app.use("/api/datos", authGuard, dataRoutes);
   app.use("/api/datos", authGuard, dataExtrtactoRoutes);
   app.use("/api", authGuard, eventRoutes);
@@ -28,4 +36,6 @@ module.exports = (app) => {
   app.use("/api", authGuard, facturasC);
   app.use("/api", authGuard, facturasdata);
   app.use("/api", authGuard, masivo);
+  app.use("/api", authGuard, users);
+  app.use("/api", authGuard, proyectado);
 };

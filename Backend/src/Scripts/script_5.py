@@ -73,6 +73,7 @@ def select(columns, names, df):
 def filter_accounts(df):
     allowed_accounts = {
         "detalle": [
+            "NACIONALES"
             "JEEVES",
             "BANCOLOMBIA 8986",
             "BANCOLOMBIA 9918",
@@ -129,6 +130,7 @@ def filter_accounts(df):
             "DE CLIENTES",
         ],
         "cuenta": [
+            "13050501",
             "21050502",
             "21051004",
             "21051006",
@@ -193,7 +195,6 @@ def filter_accounts(df):
     ]
     return filtered_df
 
-
 def link_transactions(df):
     df = df[
         pd.notnull(df["comunicacion"]) & (df["comunicacion"].str.strip() != "")
@@ -214,24 +215,41 @@ def link_transactions(df):
             for bnk_row in bnk_transactions.itertuples()
             if pd.notnull(bnk_row.comunicacion) and invoice in bnk_row.comunicacion
         ]
-        return list(set(related_invoices))
+        return list(set(related_invoices)) if related_invoices else None
 
     df["related_invoices"] = df.apply(find_related_transactions, axis=1)
 
-    def assign_bank(related_invoices):
-        for invoice in related_invoices:
-            if invoice.startswith("BNK0"):
-                return "BANCOLOMBIA"
-            elif invoice.startswith("BNK01"):
-                return "BANCO CAJA SOCIAL S.A."
-            elif invoice.startswith("BNK2"):
-                return "BANCOLOMBIA"
+    def assign_bank(invoices, empresa):
+        if not invoices or not isinstance(invoices, list):
+            return "No asignado"
+
+        for invoice in invoices:
+            if empresa.lower() == "services":
+                if invoice.startswith("BNK0"):
+                    return "BANCOLOMBIA - 1541"
+                elif invoice.startswith("BNK2"):
+                    return "BANCOLOMBIA - 4428"
+            
+            elif empresa.lower() == "privada":
+                if invoice.startswith("BNK0"):
+                    return "BANCOLOMBIA - 1534"
+                elif invoice.startswith("BNK3"):
+                    return "BANCOLOMBIA - 4430"
+                elif invoice.startswith("BNK5"):
+                    return "BANCO CAJA SOCIAL - 7765"
+
         return "No asignado"
 
-    df["banco"] = df["related_invoices"].apply(assign_bank)
-    df["estado"] = "consolidado"  # Asegúrate de que esta columna se crea aquí
+    df["banco"] = df.apply(lambda x: assign_bank(x["related_invoices"], x["empresa"]), axis=1)
+    df["estado"] = "conciliado"
+
+    # Filtrar registros sin banco asignado
+    df = df[df["banco"] != "No asignado"]
+
     return df
 
+
+     
 
 
 def process_and_store(df, table_name):
@@ -242,6 +260,7 @@ def process_and_store(df, table_name):
         "detalle",
         "debito",
         "credito",
+        "comunicacion",
         "socio",
         "banco",
         "empresa",
@@ -264,14 +283,16 @@ def process_and_store(df, table_name):
             print(f"Error al almacenar datos en la base de datos: {e}")
     else:
         print(f"Las columnas requeridas no se encuentran en el DataFrame: {df.columns}")
-
+        
+def filter_bnk_transactions(df):
+    return df[~df["factura"].astype(str).str.startswith("BNK")]
 
 def classify_transactions(df):
     conditions = [
         df["debito"].isna() & df["credito"].notna(),
         df["credito"].isna() & df["debito"].notna(),
     ]
-    choices = ["ingreso", "egreso"]
+    choices = ["egreso", "ingreso"]
 
     df["tipo_transaccion"] = np.select(conditions, choices, default="desconocido")
     df = df[df["tipo_transaccion"] != "desconocido"]
@@ -286,6 +307,7 @@ def process_and_store(df, table_name):
         "detalle",
         "debito",
         "credito",
+        "comunicacion",
         "socio",
         "banco",
         "empresa",
@@ -311,6 +333,13 @@ def process_and_store(df, table_name):
 
 
 def main(input_path):
+    
+    company = identify_company(input_path)
+    
+    if company is None:
+        print("El archivo no pertenece a 'services' ni 'privada'. No se procesará.")
+        return
+    
     columns = [
         "Unnamed: 0",
         "Unnamed: 1",
@@ -332,7 +361,6 @@ def main(input_path):
         "socio",
     ]
     table_name = "facturas_consolidadas"
-
     df = process_file(input_path)
     df = identif(df)
     df = select(columns, names, df)
@@ -340,12 +368,16 @@ def main(input_path):
     df["empresa"] = identify_company(input_path)
     df = link_transactions(df)
     df = classify_transactions(df)
+    df = df[~df["factura"].astype(str).str.startswith("BNK")] # Transformar los valores de "credito" para que sean negativos
+    df["credito"] = -df["credito"].abs()
 
     output_file = "C:/Users/Analista De Datos/Desktop/Definitivo/Backend/consolidacion/output.xlsx"
     with pd.ExcelWriter(output_file) as writer:
         df.to_excel(writer, sheet_name="Transacciones", index=False)
 
     process_and_store(df, table_name)
+    
+
 
 
 if __name__ == "__main__":

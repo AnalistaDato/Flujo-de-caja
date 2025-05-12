@@ -1,39 +1,82 @@
 <!--<c-header class="mb-4 d-print-none" position="sticky">-->
 <ng-container>
   <c-container [fluid]="true" class="border-bottom px-4">
-    <button
-      [cSidebarToggle]="sidebarId"
-      cHeaderToggler
-      class="btn"
-      toggle="visible"
-      style="margin-inline-start: -14px;"
-      aria-label="Toggle sidebar navigation"
-    >
+    <button [cSidebarToggle]="sidebarId" cHeaderToggler class="btn" toggle="visible" style="margin-inline-start: -14px;"
+      aria-label="Toggle sidebar navigation">
       <svg cIcon name="cilMenu" size="lg"></svg>
     </button>
-    <c-header-nav class="d-none d-md-flex">
-      <c-nav-item>
-        <a cNavLink routerLink="/calendario" routerLinkActive="active">Calendario</a>
-      </c-nav-item>
-      <c-nav-item>
-        <a cNavLink routerLink="/register" routerLinkActive="active">Usuarios</a>
-      </c-nav-item>
-      <c-nav-item>
-        <a cNavLink routerLink="/tabla" routerLinkActive="active">Tabla</a>
-      </c-nav-item>
+    <c-breadcrumb-router />
+
+    <c-header-nav class="d-none d-md-flex ms-auto">
+      <c-dropdown [popperOptions]="{ placement: 'bottom-end' }" variant="nav-item">
+        <button [caret]="false" cDropdownToggle class="btn p-0" aria-label="Notificaciones">
+          <svg cIcon class="my-1" name="cilBell" size="lg"></svg>
+          <c-badge color="danger" shape="rounded-pill" *ngIf="notificaciones.length > 0">
+            {{ notificaciones.length }}
+          </c-badge>
+        </button>
+        <ul cDropdownMenu class="pt-0 w-auto" style="max-height: 300px; overflow-y: auto; width: 250px;">
+          <li *ngIf="notificaciones.length === 0" class="text-center p-2">
+            <small class="text-muted">No hay notificaciones</small>
+          </li>
+          <li *ngFor="let notification of notificaciones">
+            <a cDropdownItem [routerLink]="['/notificacion']">
+              <svg cIcon class="me-2" [name]="'cilCheck'" style="color: red;"></svg>
+              <div class="notification-content" style="font-size: 0.875rem;">
+                <strong>ID:</strong> {{ notification.id }}<br>
+                <strong>Nombre:</strong> {{ notification.nombre_socio }}<br>
+                <strong>Fecha:</strong>
+                <span *ngIf="notification.fecha_reprogramacion; else fechaNormal">
+                  {{ notification.fecha_reprogramacion | date: 'short' }}
+                </span>
+                <ng-template #fechaNormal>
+                  {{ notification.fecha | date: 'short' }}
+                </ng-template>
+              </div>
+            </a>
+          </li>
+        </ul>
+      </c-dropdown>
+      <c-dropdown [popperOptions]="{ placement: 'bottom-end' }" variant="nav-item">
+        <button [caret]="false" cDropdownToggle class="btn p-0" aria-label="Proyecciones">
+          <svg cIcon class="my-1" name="cilChartLine" size="lg"></svg>
+          <c-badge color="danger" shape="rounded-pill" *ngIf="proyecciones.length > 0">
+            {{ proyecciones.length }}
+          </c-badge>
+        </button>
+        <ul cDropdownMenu class="pt-0 w-auto" style="max-height: 300px; overflow-y: auto; width: 250px;">
+          <li *ngIf="proyecciones.length === 0" class="text-center p-2">
+            <small class="text-muted">No hay proyecciones</small>
+          </li>
+          <li *ngFor="let proyeccion of proyecciones" class="d-flex justify-content-between align-items-center p-2">
+            <a cDropdownItem [routerLink]="['/proyectaods']">
+              <svg cIcon class="me-2" [name]="'cilCheck'" style="color: red;"></svg>
+              <div class="notification-content" style="font-size: 0.875rem;">
+                <strong>ID:</strong> {{ proyeccion.id }}<br>
+                <strong>Nombre:</strong> {{ proyeccion.socio }}<br>
+                <strong>Saldo:</strong>
+                <span>
+                  {{ (proyeccion.debito !== 0.0 ? proyeccion.debito : proyeccion.credito)  | currency:'COP':'symbol':'1.0-2' }}
+                </span><br>
+                <strong>Fecha:</strong>
+                <span *ngIf="proyeccion.fecha_reprogramacion; else fechaNormal">
+                  {{ proyeccion.fecha_reprogramacion | date: 'short' }}
+                </span>
+                <ng-template #fechaNormal>
+                  {{ proyeccion.fecha | date: 'short' }}
+                </ng-template>
+              </div>
+            </a>
+            <button class="btn btn-sm btn-success ms-2 clicleable" (click)="onInactivate(proyeccion.id)"
+              aria-label="Aprobar proyección">
+              <svg cIcon name="cil-check"></svg>
+            </button>
+          </li>
+        </ul>
+      </c-dropdown>
     </c-header-nav>
 
-    <c-header-nav class="d-none d-md-flex ms-auto ">
-      <a cNavLink>
-        <svg cIcon class="my-1" name="cilBell" size="lg"></svg>
-      </a>
-      <a cNavLink>
-        <svg cIcon class="my-1" name="cilList" size="lg"></svg>
-      </a>
-      <a cNavLink>
-        <svg cIcon class="my-1" name="cilEnvelopeOpen" size="lg"></svg>
-      </a>
-    </c-header-nav>
+
 
     <c-header-nav class="ms-auto ms-md-0">
       <div class="nav-item py-1">
@@ -49,9 +92,8 @@
       <ng-container *ngTemplateOutlet="userDropdown" />
     </c-header-nav>
 
-  </c-container>
-  <c-container [fluid]="true" class="px-4">
-    <c-breadcrumb-router />
+
+
   </c-container>
 </ng-container>
 <!--</c-header>-->
@@ -59,19 +101,13 @@
 <ng-template #userDropdown>
   <c-dropdown [popperOptions]="{ placement: 'bottom-start' }" variant="nav-item">
     <button [caret]="false" cDropdownToggle class="py-0 pe-0" aria-label="Open user menu">
-      <c-avatar
-        shape="rounded-1"
-        [size]="'md'"
-        src="/public/images/avatars/2.jpg"
-        status="success"
-        textColor="primary"
-        alt="User avatar"
-      />
+      <c-avatar shape="rounded-1" [size]="'md'" src="/public/images/avatars/2.jpg" status="success" textColor="primary"
+        alt="User avatar" />
     </button>
     <ul cDropdownMenu class="pt-0 w-auto">
-      
+
       <li>
-        
+
         <h6 cDropdownHeader class="bg-body-secondary text-body-secondary fw-semibold py-2">
           Configuración
         </h6>
@@ -92,7 +128,7 @@
       <li>
         <a cDropdownItem routerLink="" (click)="logout()">
           <svg cIcon class="me-2" name="cilAccountLogout"></svg>
-          Salir 
+          Salir
         </a>
       </li>
     </ul>
@@ -106,16 +142,11 @@
     </button>
     <div cDropdownMenu>
       @for (mode of colorModes; track mode.name) {
-        <button
-          (click)="colorMode.set(mode.name)"
-          [active]="colorMode()===mode.name"
-          [routerLink]="[]"
-          cDropdownItem
-          class="d-flex align-items-center"
-        >
-          <svg cIcon class="me-2" [name]="mode.icon" size="lg"></svg>
-          {{ mode.text }}
-        </button>
+      <button (click)="colorMode.set(mode.name)" [active]="colorMode()===mode.name" [routerLink]="[]" cDropdownItem
+        class="d-flex align-items-center">
+        <svg cIcon class="me-2" [name]="mode.icon" size="lg"></svg>
+        {{ mode.text }}
+      </button>
       }
     </div>
   </c-dropdown>

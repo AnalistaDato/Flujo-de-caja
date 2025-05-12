@@ -1,0 +1,65 @@
+.btn-custom {
+    background-color: #840707 !important;
+    color: white !important;
+    border: none;
+  }
+  
+  .btn-custom:hover {
+    background-color: #6b0505 !important;
+  }
+  .is-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 5px rgba(220, 53, 69, 0.5);
+  }
+  
+  .alert {
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 5px;
+  }
+  
+  .btn-custom {
+    background-color: #840707 !important;
+    color: white !important;
+    border: none;
+  }
+  
+  .btn-custom:hover {
+    background-color: #6b0505 !important;
+  }
+
+  .btn-custom-white {
+    background-color: white !important;
+    color: black !important;
+    border: 1px solid #840707 !important; /* Puedes ajustar el color del borde si lo deseas */
+}
+
+.btn-custom-white:hover {
+    background-color: #f8f9fa !important; /* Gris claro en hover */
+    color: black !important; /* Mantener el texto negro en hover */
+    border: 1px solid #6b0505 !important; /* Borde más oscuro en hover */
+}
+
+.card-custom {
+  padding: 30px; /* Aumenta el padding para evitar que los elementos se apelmacen */
+  margin-bottom: 20px; /* Espaciado entre las dos cards */
+  min-height: 400px; /* Ajusta la altura mínima para que tenga espacio suficiente */
+}
+
+.card-register {
+  background-color: #840707;
+  color: white;
+  padding: 40px 20px;
+  border-radius: 10px;
+}
+
+.card-register button {
+  background-color: white !important;
+  color: #840707 !important;
+  border: 1px solid #840707 !important;
+}
+
+.card-register button:hover {
+  background-color: #f8f9fa !important;
+  color: #840707 !important;
+}

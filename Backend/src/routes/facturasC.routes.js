@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const { exec } = require('child_process');
+const authorize = require("../middleware/authorize"); // Middleware de autorización
 
 const router = express.Router();
 
@@ -27,7 +28,7 @@ const fileFilter = (_req, file, cb) => {
  const upload = multer({ storage, fileFilter });
 
 // Route to upload and process a file
-router.post('/consolidacion', upload.single('file'), (req, res) => {
+router.post('/consolidacion', upload.single('file'), authorize("Admin", "Gerente"),(req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: 'Archivo no subido o con un formato invalido.' });
     }
@@ -35,10 +36,12 @@ router.post('/consolidacion', upload.single('file'), (req, res) => {
     const filePath = req.file.path;
 
 // Ruta al archivo de Python
-const pythonScriptPath = path.join(__dirname, '../Scripts/script_5.py');
+const script3Path = path.join(__dirname, '../Scripts/script_3.py');
+  const script5Path = path.join(__dirname, '../Scripts/script_5.py');
 
-// Comando para ejecutar el script de Python
-const command = `python "${pythonScriptPath}" "${filePath}"`;
+  // Ejecutar script_3.py primero y luego script_5.py
+  const command = `python "${script3Path}" "${filePath}" && python "${script5Path}" "${filePath}"`;
+
 
 exec(command, (error, stdout, stderr) => {
   if (error) {

@@ -1,0 +1,45 @@
+
+  <h2 class="text-center mb-4">Notificaciones de Facturas</h2>
+
+  <div *ngIf="notificaciones.length === 0" class="alert alert-info text-center">
+    No hay notificaciones dentro del rango de fechas.
+  </div>
+
+  <div *ngIf="notificaciones.length > 0">
+      <button class="btn btn-success mb-3" (click)="exportToExcel()">
+          Exportar a Excel
+      </button>
+
+      <div class="table-responsive">
+          <table class="table table-bordered table-hover text-center">
+              <thead class="table-dark">
+                  <tr>
+                      <th>ID</th>
+                      <th>Factura</th>
+                      <th>Fecha Factura</th>
+                      <th>Fecha Vencimiento</th>
+                      <th>Total</th>
+                      <th>Adeudado</th>
+                      <th>Estado</th>
+                      <th>Empresa</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <tr *ngFor="let factura of notificaciones">
+                      <td>{{ factura.id }}</td>
+                      <td>{{ factura.nombre_socio}}</td>
+                      <td>{{ factura.fecha_factura ? (factura.fecha_factura| date: 'dd/MM/yyyy') : 'N/A' }}</td>
+                      <td>{{ factura.fecha_reprogramacion ? (factura.fecha_reprogramacion | date: 'dd/MM/yyyy') : (factura.fecha_vencimiento ? (factura.fecha_vencimiento | date: 'dd/MM/yyyy') : 'N/A') }}</td>
+                      <td class="text-end">{{ factura.total_en_divisa | currency:'COP':'symbol' }}</td>
+                      <td class="text-end">{{ factura.importe_adeudado_sin_signo| currency:'COP':'symbol' }}</td>
+                      <td>
+                          <span [ngClass]="{'text-success': factura.estado === 'Pagada', 'text-danger': factura.estado !== 'Pagada'}">
+                              {{ factura.estado_pago }}
+                          </span>
+                      </td>
+                      <td>{{ factura.empresa }}</td>
+                  </tr>
+              </tbody>
+          </table>
+      </div>
+  </div>

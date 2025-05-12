@@ -1,3 +1,12 @@
 ::ng-deep .custom-modal .modal-dialog {
-    max-width: 80%; /* Ajusta este valor según sea necesario */
+    max-width: 100%; /* Ajusta este valor según sea necesario */
   }
+.card {
+    max-height: 80vh;
+    overflow-y: auto; 
+} 
+.table-responsive {
+    max-height: calc(80vh - 120px);
+    overflow-y: auto;
+}
+  

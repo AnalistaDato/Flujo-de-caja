@@ -1,0 +1,8 @@
+.card {
+    max-height: 80vh;
+    overflow-y: auto; 
+}
+.table-responsive {
+    max-height: calc(80vh - 120px);
+    overflow-y: auto;
+}

@@ -1,13 +1,21 @@
 body {
   background-color: var(--cui-tertiary-bg);
+  height: 100vh; /* Ocupa toda la altura de la pantalla */
+  display: flex;
+  flex-direction: column;
 }
+
 
 .wrapper {
   width: 100%;
+  height: 100%;
   padding-left: var(--cui-sidebar-occupy-start, 0);
   padding-right: var(--cui-sidebar-occupy-end, 0);
   will-change: auto;
   transition: padding .15s;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
 .header > .container-fluid,
@@ -45,8 +53,8 @@ body {
 }
 
 .table-responsive {
-  max-width: 100%;
   overflow-x: auto;
+  overflow-y: auto; /* Permite desplazamiento vertical */
 }
 
 .table {

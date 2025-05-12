@@ -19,11 +19,11 @@ import { TablesComponent } from '../tables/tables.component';
 @Component({
   selector: 'app-form',
   standalone: true,
-  imports: [NgStyle, MatDatepickerModule, MatNativeDateModule,
+  imports: [MatDatepickerModule, MatNativeDateModule,
     DropdownModule, CommonModule, FormsModule, ReactiveFormsModule, GridModule, RowComponent, ColComponent, TextColorDirective, CardComponent, CardHeaderComponent, CardBodyComponent,
-    FormDirective, FormLabelDirective, FormControlDirective, FormFeedbackComponent, InputGroupComponent, InputGroupTextDirective,
-    FormSelectDirective, FormCheckComponent, FormCheckInputDirective, FormCheckLabelDirective, ButtonDirective, ListGroupDirective, ListGroupItemDirective,
-    CardGroupComponent, ContainerComponent, IconDirective, IconModule],
+    FormDirective, FormLabelDirective, FormControlDirective,
+    FormSelectDirective, ButtonDirective,
+    IconDirective, IconModule],
   templateUrl: './form.component.html',
   styleUrls: ['./form.component.css']
 })
@@ -106,7 +106,7 @@ export class FormComponent implements OnInit {
       nombre_socio: factura.nombre_socio,
       fechaCreacion: factura.fecha_factura,
       fecha_reprogramacion: factura.fecha_reprogramacion || '',
-      saldo: factura.total,
+      saldo: factura.total_en_divisa,
       nuevo_pago: factura.nuevo_pago,
       conf_banco: factura.conf_banco || '',
       valor: factura.total,

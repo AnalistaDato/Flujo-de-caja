@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpEvent, HttpEventType, HttpRequest } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpEventType, HttpHeaders, HttpRequest } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '@environments/environment.prod';
@@ -12,11 +12,32 @@ export class UploadService {
 
   constructor(private http: HttpClient) { }
 
+
+  private getAuthHeaders(isMultipart = false): HttpHeaders {
+    const token = localStorage.getItem('authToken');
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    } else {
+      console.warn('⚠️ No se encontró el token en localStorage.');
+    }
+
+    if (!isMultipart) {
+      headers = headers.set('Content-Type', 'application/json');
+    }
+
+    return headers;
+  }
+
+
   uploadFile(file: File): Observable<any> {
     const formData: FormData = new FormData();
     formData.append('file', file, file.name);
 
+    const headers = this.getAuthHeaders(true);
+ 
     const req = new HttpRequest('POST', this.UPLOAD_URL, formData, {
+      headers: headers,
       reportProgress: true,
       responseType: 'json'
     });

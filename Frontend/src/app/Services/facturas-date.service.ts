@@ -11,10 +11,12 @@ export interface FacturaConsolidada {
   fecha_reprogramacion: Date | null; // Cambiado de string a Date | null
   cuenta: string;
   detalle: string;
+  comunicacion: string;
   debito: number;
   credito: number;
   socio: string;
   banco: string;
+  estado:string;
   empresa:string
 }
 
@@ -33,7 +35,7 @@ export class FacturasDateService {
    // Helper function to get headers with Authorization authToken
    private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('authToken');
-    console.log("Token:", token); // Verifica que el token exista
+
     let headers = new HttpHeaders();
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
@@ -42,7 +44,7 @@ export class FacturasDateService {
   }
 
   getDatos(params: HttpParams): Observable<any> {
-    const headers = this.getAuthHeaders(); // Obtén las cabeceras con el token
+    const headers = this.getAuthHeaders();
     return this.http.get<any>(this.apiUrl, { params, headers  })
       .pipe(
         map(response => ({

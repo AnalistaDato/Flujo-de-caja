@@ -1,22 +1,33 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../db");
+const authGuard = require("../middleware/authGuard"); // Middleware de autenticación
+const authorize = require("../middleware/authorize"); // Middleware de autorización
+
+
 
 // Función para formatear la fecha
 function formatDate(date) {
   if (!date || date === "1969-12-31") return null;
+
+  // Verificar si la fecha es válida antes de intentar formatearl
   const d = new Date(date);
+
+  // Verificar si la conversión de la fecha fue exitosa
+  if (isNaN(d.getTime())) {
+    console.error("Fecha inválida:", date);
+    return null; // Si la fecha no es válida, devolver null
+  }
+
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
-  const hours = String(d.getHours()).padStart(2, "0");
-  const minutes = String(d.getMinutes()).padStart(2, "0");
-  const seconds = String(d.getSeconds()).padStart(2, "0");
 
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  return `${year}-${month}-${day}`;
 }
 
-router.get("/datos", async (req, res) => {
+
+router.get("/datos",authorize("Admin", "Gerente","Controller","Contador"), async (req, res) => {
   try {
     const { draw, start, length, search, order, columns } = req.query;
 
@@ -59,20 +70,19 @@ router.get("/datos", async (req, res) => {
         f.impuestos,
         f.total,
         f.total_en_divisa,
-        f.importe_adeudado,
+        f.importe_adeudado_sin_signo,
         f.estado_pago,
         f.estado,
         f.estado_g,
         f.fecha_reprogramacion,
-        f.conf_banco,
         f.nuevo_pago,
         f.empresa,
-        COALESCE(f.cuenta_contable, o.cuenta_contable) AS cuenta_contable,
-    c.cuenta AS cuenta_bancaria_numero
+        COALESCE(f.cuenta_contable, o.cuenta_contable) AS cuenta_contable
 FROM facturas f
-LEFT JOIN cuentas_bancarias c ON f.conf_banco = c.id
-LEFT JOIN cuentas_contables o ON f.numero = o.factura
-WHERE f.estado_g = 'activo' OR f.estado_g = 'proyectado'
+LEFT JOIN cuentas_contables o ON f.numero = o.factura AND f.empresa = o.empresa
+WHERE (f.estado_g = 'A') 
+   AND f.estado != 'Cancelado'
+   AND (f.estado_pago = 'Pagado Parcialmente' OR f.estado_pago = 'No pagadas')
 ORDER BY ${columnsParams[orderParams[0].column]?.data || "f.numero"} ${
       orderParams[0].dir
     }
@@ -141,7 +151,7 @@ router.get("/datos/:id", async (req, res) => {
         f.impuestos,
         f.total,
         f.total_en_divisa,
-        f.importe_adeudado,
+        f.importe_adeudado_sin_signo,
         f.estado_pago,
         f.estado,
         f.estado_g,
@@ -149,13 +159,9 @@ router.get("/datos/:id", async (req, res) => {
         f.conf_banco,
         f.nuevo_pago,
         f.empresa,
-        f.diferencia,
-        f.cuenta_contable, 
-        c.cuenta AS cuenta_bancaria_numero,
-        o.cuenta_contable AS cuenta_contable_c
+        c.cuenta AS cuenta_bancaria_numero  
       FROM facturas f
       LEFT JOIN cuentas_bancarias c ON f.conf_banco = c.id
-      LEFT JOIN cuentas_contables o ON f.numero = o.factura   
       WHERE f.id = ?
     `,
       [id]
@@ -163,11 +169,6 @@ router.get("/datos/:id", async (req, res) => {
 
     if (rows.length > 0) {
       const factura = rows[0];
-
-      // Formatear las fechas antes de devolver los resultados
-      factura.fecha_factura = formatDate(factura.fecha_factura);
-      factura.fecha_vencimiento = formatDate(factura.fecha_vencimiento);
-      factura.fecha_reprogramacion = formatDate(factura.fecha_reprogramacion);
 
       res.json(factura);
     } else {
@@ -183,7 +184,7 @@ router.put("/datos/:id/inactivate", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const query = `UPDATE facturas SET estado_g = 'inactivo' WHERE id = ?`;
+    const query = `UPDATE facturas SET estado_g = 'I' WHERE id = ?`;
     const [result] = await pool.query(query, [id]);
 
     if (result.affectedRows > 0) {
@@ -200,18 +201,13 @@ router.put("/datos/:id/inactivate", async (req, res) => {
 router.put("/datos/:id", async (req, res) => {
   const { id } = req.params;
   const {
-    numero,
-    nombre_socio,
-    fecha_factura,
-    fecha_vencimiento,
+   
+    
+   
     total,
-    importe_adeudado,
-    estado,
-    estado_g,
     fecha_reprogramacion,
     conf_banco,
     nuevo_pago,
-    empresa,
     diferencia,
     cuenta_contable,
   } = req.body;
@@ -222,36 +218,20 @@ router.put("/datos/:id", async (req, res) => {
     const query = `
       UPDATE facturas 
       SET 
-        numero = ?, 
-        nombre_socio = ?, 
-        fecha_factura = ?, 
-        fecha_vencimiento = ?, 
-        total = ?, 
-        importe_adeudado = ?, 
-        estado = ?, 
-        estado_g = ?, 
+        total = ?,
         fecha_reprogramacion = ?,
         conf_banco = ?,
         nuevo_pago = ?,
-        empresa = ?,
         diferencia = ?,
         cuenta_contable = ?
       WHERE id = ?
     `;
 
     const queryParams = [
-      numero,
-      nombre_socio,
-      fecha_factura,
-      fecha_vencimiento,
       total,
-      importe_adeudado,
-      estado,
-      estado_g,
       formattedFechaReprogramacion,
       conf_banco,
       nuevo_pago,
-      empresa,
       diferencia,
       cuenta_contable,
       id,
@@ -285,7 +265,7 @@ router.post("/datos", async (req, res) => {
     impuestos,
     total,
     total_en_divisa,
-    importe_adeudado,
+    importe_adeudado_sin_signo,
     estado_pago,
     estado,
     estado_g,
@@ -313,7 +293,7 @@ router.post("/datos", async (req, res) => {
         impuestos, 
         total, 
         total_en_divisa, 
-        importe_adeudado, 
+        importe_adeudado_sin_signo, 
         estado_pago, 
         estado, 
         estado_g, 
@@ -337,7 +317,7 @@ router.post("/datos", async (req, res) => {
       impuestos,
       total,
       total_en_divisa,
-      importe_adeudado,
+      importe_adeudado_sin_signo,
       estado_pago,
       estado,
       estado_g,

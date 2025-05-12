@@ -1,0 +1,84 @@
+<div class="bg-light dark:bg-transparent min-vh-100 d-flex flex-row align-items-center justify-content-center">
+  <c-container breakpoint="md">
+    <c-row class="justify-content-center w-100">
+      <c-col xs="12" sm="8" md="6" lg="5">
+        <c-card-group>
+          <c-card class="p-4">
+            <c-card-body>
+              <h1 class="text-center">Securicol</h1>
+              <p class="text-body-secondary text-center">Restablecer Contraseña</p>
+
+              <!-- Mensaje de éxito o error -->
+              <div *ngIf="message" class="alert alert-info text-center">
+                {{ message }}
+              </div>
+              <div *ngIf="resetForm.get('newPassword')?.invalid && resetForm.get('newPassword')?.touched"
+                class="invalid-feedback">
+              </div>
+              <form [formGroup]="resetForm" (ngSubmit)="onSubmit()">
+                <c-input-group class="mb-3">
+                  <span cInputGroupText>
+                    <svg cIcon name="cilLockLocked"></svg>
+                  </span>
+                  <input id="newPassword" type="password" cFormControl placeholder="Nueva contraseña"
+                    formControlName="newPassword" required
+                    [ngClass]="{'is-invalid': resetForm.get('newPassword')?.invalid && resetForm.get('newPassword')?.touched}" />
+                  <span (click)="togglePasswordVisibility()" style="cursor: pointer;">
+                    <svg *ngIf="!passwordVisible" cIcon name="cilEye"></svg> <!-- Ícono de ojo para mostrar -->
+                    <svg *ngIf="passwordVisible" cIcon name="cilEyeOff"></svg>
+                    <!-- Ícono de ojo tachado para ocultar -->
+                  </span>
+                </c-input-group>
+
+                <c-input-group class="mb-3">
+                  <span cInputGroupText>
+                    <svg cIcon name="cilLockLocked"></svg>
+                  </span>
+                  <input id="confirmPassword" type="password" cFormControl placeholder="Confirmar contraseña"
+                    formControlName="confirmPassword" required
+                    [ngClass]="{'is-invalid': resetForm.get('confirmPassword')?.invalid && resetForm.get('confirmPassword')?.touched}" />
+                  <span (click)="togglePasswordVisibility()" style="cursor: pointer;">
+                    <svg *ngIf="!passwordVisible" cIcon name="cilEye"></svg> <!-- Ícono de ojo para mostrar -->
+                    <svg *ngIf="passwordVisible" cIcon name="cilEyeOff"></svg>
+                    <!-- Ícono de ojo tachado para ocultar -->
+                  </span>
+                </c-input-group>
+                
+
+                <div *ngIf="resetForm.get('confirmPassword')?.invalid && resetForm.get('confirmPassword')?.touched"
+                  class="invalid-feedback">
+                  <div *ngIf="resetForm.get('confirmPassword')?.hasError('required')">La confirmación de la contraseña
+                    es obligatoria.</div>
+                </div>
+
+                <c-row>
+                  <c-col xs="6">
+                    <button cButton class="px-4 w-100 btn-custom" type="submit" [disabled]="resetForm.invalid">
+                      Restablecer
+                    </button>
+                  </c-col>
+                  <c-col class="text-right" xs="6">
+                    <button cButton class="px-0" color="link" [routerLink]="['/login']">
+                      Volver al inicio
+                    </button>
+                  </c-col>
+                </c-row>
+              </form>
+              <div *ngIf="resetForm.get('newPassword')?.invalid && resetForm.get('newPassword')?.touched" class="invalid-feedback d-block">
+                <div *ngIf="resetForm.get('newPassword')?.hasError('required')">
+                  La contraseña es obligatoria.
+                </div>
+                <div *ngIf="resetForm.get('newPassword')?.hasError('minlength')">
+                  La contraseña debe tener al menos 6 caracteres.
+                </div>
+                <div *ngIf="resetForm.get('newPassword')?.hasError('pattern')">
+                  La contraseña debe incluir al menos una mayúscula, una minúscula, un número y un carácter especial.
+                </div>
+              </div>
+            </c-card-body>
+          </c-card>
+        </c-card-group>
+      </c-col>
+    </c-row>
+  </c-container>
+</div>

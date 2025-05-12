@@ -12,7 +12,6 @@
   },
   "private": true,
   "dependencies": {
-     "@types/jwt-decode": "^3.1.0",
     "@angular/animations": "^18.2.12",
     "@angular/cdk": "^18.1.2",
     "@angular/common": "^18.2.12",
@@ -36,6 +35,7 @@
     "@fullcalendar/list": "^6.1.14",
     "@fullcalendar/resource-timeline": "^6.1.15",
     "@fullcalendar/timegrid": "^6.1.14",
+    "@types/jwt-decode": "^3.1.0",
     "angular-datatables": "^18.0.0",
     "animations": "^0.0.0",
     "bootstrap": "^5.3.3",
@@ -48,7 +48,9 @@
     "ngx-scrollbar": "^15.1.2",
     "rxjs": "~7.8.0",
     "sass": "^1.77.8",
+    "sweetalert2": "^11.17.2",
     "tslib": "^2.3.0",
+    "xlsx": "^0.18.5",
     "zone.js": "~0.14.10"
   },
   "devDependencies": {

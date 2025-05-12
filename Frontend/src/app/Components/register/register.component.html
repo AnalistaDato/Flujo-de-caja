@@ -1,48 +1,96 @@
-<div class="bg-light dark:bg-transparent min-vh-100 d-flex flex-row align-items-center">
-    <c-container>
-      <c-row class="justify-content-center">
-        <c-col lg="7" md="9" xl="6">
-          <c-card class="mx-4">
-            <c-card-body class="p-4">
-              <form cForm>
-                <h1>Regtistro</h1>
-                <p class="text-body-secondary">Crear usuario</p>
-                <c-input-group class="mb-3">
-                  <span cInputGroupText>
-                    <svg cIcon name="cilUser"></svg>
-                  </span>
-                  <input autoComplete="name" cFormControl placeholder="Usuario" />
-                </c-input-group>
-                <c-input-group class="mb-3">
-                  <span cInputGroupText>&#64;</span>
-                  <input autoComplete="email" cFormControl placeholder="Correo" />
-                </c-input-group>
-                <c-input-group class="mb-3">
-                  <span cInputGroupText>
-                    <svg cIcon name="cilLockLocked"></svg>
-                  </span>
-                  <input autoComplete="new-password" cFormControl placeholder="Contraseña" type="password" />
-                </c-input-group>
-                <c-input-group class="mb-4">
-                  <span cInputGroupText>
-                    <svg cIcon name="cilLockLocked"></svg>
-                  </span>
-                  <input autoComplete="new-password" cFormControl placeholder="Repetir Contraseña" type="password" />
-                </c-input-group>
-                <c-input-group class="mb-3">
-                  <span cInputGroupText>
-                    <svg cIcon name="cilContact"></svg>
-                  </span>
-                  <input autoComplete="name" cFormControl placeholder="Cargo" />
-                </c-input-group>
-                <div class="d-grid">
-                  <button cButton color="success">Create Account</button>
-                </div>
-              </form>
-            </c-card-body>
-          </c-card>
-        </c-col>
-      </c-row>
-    </c-container>
-  </div>
-  
+<div class="bg-light dark:bg-transparent  align-items-center">
+  <c-col lg="7" md="9" xl="6">
+    <c-card class="mx-4">
+      <c-card-body class="p-4">
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+          <h1>Registro</h1>
+          <p class="text-body-secondary">Crear usuario</p>
+
+          <!-- Usuario -->
+          <c-input-group class="mb-3">
+            <span cInputGroupText>
+              <svg cIcon name="cilUser"></svg>
+            </span>
+            <input formControlName="username" autoComplete="name" cFormControl placeholder="Usuario" />
+          </c-input-group>
+          <div *ngIf="registerForm.get('username')?.invalid && registerForm.get('username')?.touched"
+            class="invalid-feedback d-block">
+            <div *ngIf="registerForm.get('username')?.hasError('required')">El usuario es obligatorio.</div>
+          </div>
+
+          <!-- Correo -->
+          <c-input-group class="mb-3">
+            <span cInputGroupText>&#64;</span>
+            <input formControlName="email" autoComplete="email" cFormControl placeholder="Correo" />
+          </c-input-group>
+          <div *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+            class="invalid-feedback d-block">
+            <div *ngIf="registerForm.get('email')?.hasError('required')">El correo es obligatorio.</div>
+            <div *ngIf="registerForm.get('email')?.hasError('email')">El correo no es válido.</div>
+          </div>
+
+          <div *ngIf="!isEditMode">
+            <!-- Contraseña -->
+            <c-input-group class="mb-3">
+              <span cInputGroupText>
+                <svg cIcon name="cilLockLocked"></svg>
+              </span>
+              <input formControlName="password" autoComplete="new-password" cFormControl placeholder="Contraseña"
+                type="password" />
+            </c-input-group>
+            <div *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+              class="invalid-feedback d-block">
+              <div *ngIf="registerForm.get('password')?.hasError('required')">La contraseña es obligatoria.</div>
+              <div *ngIf="registerForm.get('password')?.hasError('minlength')">La contraseña debe tener al menos 8
+                caracteres.</div>
+              <div *ngIf="registerForm.get('password')?.hasError('pattern')">La contraseña debe incluir al menos una
+                mayúscula, una minúscula, un número y un carácter especial.</div>
+            </div>
+
+            <!-- Repetir Contraseña -->
+            <c-input-group class="mb-4">
+              <span cInputGroupText>
+                <svg cIcon name="cilLockLocked"></svg>
+              </span>
+              <input formControlName="confirmPassword" autoComplete="new-password" cFormControl
+                placeholder="Repetir Contraseña" type="password" />
+            </c-input-group>
+            <div *ngIf="registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched"
+              class="invalid-feedback d-block">
+              <div *ngIf="registerForm.get('confirmPassword')?.hasError('required')">La confirmación de contraseña es
+                obligatoria.</div>
+              <div *ngIf="registerForm.hasError('passwordMismatch')">Las contraseñas no coinciden.</div>
+            </div>
+          </div>
+
+          <!-- Cargo -->
+          <c-input-group class="mb-3">
+            <span cInputGroupText>
+              <svg cIcon name="cilContact"></svg>
+            </span>
+            <select formControlName="rol" class="form-select">
+              <option value="Admin">Admin</option>
+              <option value="Gerente">Gerente</option>
+              <option value="Contador">Contador</option>
+              <option value="Controller">Controller</option>
+              <option value="Prueba">Prueba</option>
+            </select>
+          </c-input-group>
+
+          <!-- Error message from backend -->
+          <div *ngIf="errorMessage" class="alert alert-danger">
+            {{ errorMessage }}
+          </div>
+
+          <!-- Botón de Enviar -->
+          <div class="d-grid">
+            <button cButton color="success" [disabled]="registerForm.invalid" type="submit">{{ isEditMode ? 'Guardar' : 'Crear Usuario' }}</button>
+          </div>
+          <c-col class="text-right" xs="6">
+            <button cButton class="px-0" color="link" [routerLink]="['/login']">Volver al inicio</button>
+          </c-col>
+        </form>
+      </c-card-body>
+    </c-card>
+  </c-col>
+</div>

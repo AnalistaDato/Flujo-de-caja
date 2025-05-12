@@ -38,18 +38,13 @@ import { ExtractoDataService } from '../../Services/extracto-data.service';
 @Component({
   selector: 'app-extracto',
   standalone: true,
-  imports: [FormEventComponent,
+  imports: [
     CommonModule,
     DataTablesModule,
     AlertComponent,
-    FormCheckComponent,
-    FormCheckInputDirective,
     ColComponent,
     FormControlDirective,
-    InputGroupComponent,
-    FormSelectDirective,
     RowComponent,
-    FormDirective,
     ModalComponent,
     ModalHeaderComponent,
     ModalTitleDirective,
@@ -60,7 +55,6 @@ import { ExtractoDataService } from '../../Services/extracto-data.service';
     IconModule,
     ButtonGroupComponent,
     ButtonDirective,
-    ContainerComponent,
     GridModule,
     IconDirective],
   templateUrl: './extracto.component.html',
@@ -123,14 +117,14 @@ export class ExtractoComponent implements OnInit, OnDestroy {
           orderable: false,
           render: (data: any) => {
             return `
-              <div class="btn-group" role="group">
-                <button type="button" class="btn btn-primary btn-sm edit-btn" title="Editar" data-id="${data.id}">
+              <div class="btn-group d-flex" role="group">
+                <button type="button" class="btn btn-primary btn-m edit-btn" title="Editar" data-id="${data.id}">
                   <i class="cil-pencil"></i> 
                 </button>
-                <button type="button" class="btn btn-warning btn-sm reschedule-btn" title="Reprogramar" data-id="${data.id}">
+                <button type="button" class="btn btn-warning btn-m reschedule-btn" title="Reprogramar" data-id="${data.id}">
                   <i class="cil-calendar"></i> 
                 </button>
-                <button type="button" class="btn btn-danger btn-sm inactivate-btn" title="Inactivar" data-id="${data.id}">
+                <button type="button" class="btn btn-danger btn-m inactivate-btn" title="Inactivar" data-id="${data.id}">
                   <i class="cil-ban"></i> 
                 </button>
               </div>

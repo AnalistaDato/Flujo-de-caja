@@ -10,13 +10,8 @@ import {
   ButtonGroupComponent,
   ColComponent,
   ContainerComponent,
-  FormCheckComponent,
-  FormCheckInputDirective,
   FormControlDirective,
-  FormDirective,
-  FormSelectDirective,
   GridModule,
-  InputGroupComponent,
   ModalBodyComponent,
   ModalComponent,
   ModalFooterComponent,
@@ -44,14 +39,9 @@ import { Factura } from '../../Services/data.service'; // Asegúrate de importar
     CommonModule,
     DataTablesModule,
     AlertComponent,
-    FormCheckComponent,
-    FormCheckInputDirective,
     ColComponent,
     FormControlDirective,
-    InputGroupComponent,
-    FormSelectDirective,
     RowComponent,
-    FormDirective,
     ModalComponent,
     ModalHeaderComponent,
     ModalTitleDirective,
@@ -62,10 +52,9 @@ import { Factura } from '../../Services/data.service'; // Asegúrate de importar
     IconModule,
     ButtonGroupComponent,
     ButtonDirective,
-    ContainerComponent,
     GridModule,
     IconDirective
-  ],
+],
   templateUrl: './tables.component.html',
   styleUrls: ['./tables.component.css']
 })
@@ -132,24 +121,22 @@ export class TablesComponent implements OnInit, OnDestroy {
 
         },
         {
-          data: 'total',
-          render: (data: number) => this.formatCurrency(data) // Format currency
-        },
-        {
-          data: 'importe_adeudado',
-          render: (data: number) => this.formatCurrency(data) // Format currency
-        },
-        {
           data: 'fecha_reprogramacion',
-          render: (data: string) => this.formatDate(data) // Format date
+          render: (data: string)=> this.formatDate(data)
         },
-        { data: 'cuenta_bancaria_numero' },
+        {
+          data: 'total_en_divisa',
+          render: (data: number) => this.formatCurrency(data) // Format currency
+        },
+        {
+          data: 'importe_adeudado_sin_signo',
+          render: (data: number) => this.formatCurrency(data) // Format currency
+        },
         {
           data: 'nuevo_pago',
           render: (data: number) => this.formatCurrency(data) // Format currency
         },
-        { data: 'estado_pago' },
-        { data: 'cuenta_contable' },
+        { data: 'empresa' },
         {
           data: null,
           orderable: false,
@@ -244,6 +231,7 @@ export class TablesComponent implements OnInit, OnDestroy {
   }
 
   openActModal(id: number): void {
+    const params = new HttpParams()
     // Llama al servicio para obtener la factura por ID
     this.dataService.getFacturaById(id).subscribe({
       next: (factura: Factura) => {

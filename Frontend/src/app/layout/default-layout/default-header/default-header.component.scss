@@ -1,0 +1,12 @@
+.dropdown-menu {
+    max-height: 300px; // Limita la altura máxima
+    overflow-y: auto; // Agrega scroll vertical cuando sea necesario
+   
+  }
+  .notification-content {
+    display: flex;
+    flex-direction: column; // Apila los elementos en columna
+    max-width: 100px; // Define un ancho máximo
+    word-wrap: break-word; // Fuerza el salto de línea si es muy largo
+    white-space: normal; // Permite que el texto se acomode dentro del ancho
+  }

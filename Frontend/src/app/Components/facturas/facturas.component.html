@@ -1,70 +1,72 @@
-<c-container breakpoint="lg" style="margin-top: 10px;">
-  <div class="container mt-4">
-    <div class="card">
-      <div class="card-header">
-        <c-row class="align-items-center">
-          <!-- CoreUI Alert Component -->
-          <c-alert *ngIf="showAlert" color="info" (click)="showAlert = false">
-            {{ uploadMessage }}
-          </c-alert>
+<div class="card">
+  <div class="card-header">
+    <c-row class="align-items-center">
+      <!-- CoreUI Alert Component -->
+      <c-alert *ngIf="showAlert" color="info" (click)="showAlert = false">
+        {{ uploadMessage }}
+      </c-alert>
 
-          <!-- Columna para el título centrado -->
-          <c-col class="text-left" style="flex: 1;">
-            <h5>Facturas Consolidadas</h5>
-          </c-col>
-        </c-row>
-        <!-- Columna para los botones alineados a la derecha -->
-        <c-col class="text-end">
-          <c-button-group aria-label="Basic mixed styles example" role="group">
-            <button cButton color="info" variant="outline" (click)="openUploadModal()">
-              <svg cIcon name="cilDataTransferUp" size="xl" title="Transfer Up"></svg>
-            </button>
-            <button cButton color="success" variant="outline" (click)="openUploadModalMasivo()">
-              <svg cIcon name="cilPlus" size="xl" title="Transfer Up"></svg>
-            </button>
-          </c-button-group>
-        </c-col>
-
-      </div>
-
-      <div class="table-responsive">
-        <table datatable [dtOptions]="dtOptions" class="table table-striped table-bordered">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Factura</th>
-              <th>Fecha</th>
-              <th>Cuenta</th>
-              <th>Detalle</th>
-              <th>Debito</th>
-              <th>Credito</th>
-              <th>Socio</th>
-              <th>Banco</th>
-              <th>Empresa</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of data">
-              <td>{{ item.id }}</td>
-              <td>{{ item.factura }}</td>
-              <td>{{ item.fecha | date }}</td>
-              <td>{{ item.cuenta }}</td>
-              <td>{{ item.detalle }}</td>
-              <td>{{ item.debito | currency:'COP' }}</td>
-              <td>{{ item.credito | currency:'COP' }}</td>
-              <td>{{ item.socio }}</td>
-              <td>{{ item.banco }}</td>
-              <td>{{ item.empresa }}</td>
-              <td>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+      <!-- Columna para el título centrado -->
+      <c-col class="text-left" style="flex: 1;">
+        <h5>Facturas Consolidadas</h5>
+      </c-col>
+    
+    <!-- Columna para los botones alineados a la derecha -->
+    <c-col class="text-end">
+      <c-button-group aria-label="Basic mixed styles example" role="group">
+        <button cButton color="info" variant="outline" (click)="openUploadModal()">
+          <svg cIcon name="cilDataTransferUp" size="xl" title="Transfer Up"></svg>
+        </button>
+        <button cButton color="success" variant="outline" (click)="openUploadModalMasivo()">
+          <svg cIcon name="cilPlus" size="xl" title="Transfer Up"></svg>
+        </button>
+      </c-button-group>
+    </c-col>
+  </c-row>
   </div>
-</c-container>
+
+  <div class="table-responsive">
+    <table datatable [dtOptions]="dtOptions" class="table table-striped table-bordered">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Factura</th>
+          <th>Fecha</th>
+          <th>Fecha Reprogramada</th>
+          <th>Cuenta</th>
+          <th>Detalle</th>
+          <th>Descripción</th>
+          <th>Debito</th>
+          <th>Credito</th>
+          <th>Socio</th>
+          <th>Banco</th>
+          <th>Estado</th>
+          <th>Empresa</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of data">
+          <td>{{ item.id }}</td>
+          <td>{{ item.factura }}</td>
+          <td>{{ item.fecha | date }}</td>
+          <td>{{ item.fecha_reprogramacion | date }}</td>
+          <td>{{ item.cuenta }}</td>
+          <td>{{ item.detalle }}</td>
+          <td>{{item.comunicacion}}</td>
+          <td>{{ item.debito | currency:'COP' }}</td>
+          <td>{{ item.credito | currency:'COP' }}</td>
+          <td>{{ item.socio }}</td>
+          <td>{{ item.banco }}</td>
+          <td>{{item.estado}}</td>
+          <td>{{ item.empresa }}</td>
+          <td>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
 <!-- Modal para subir documento -->
 <c-modal id="uploadModal" [visible]="uploadModalVisible" (visibleChange)="handleUploadModalChange($event)">
@@ -97,7 +99,7 @@
   </c-modal-body>
 </c-modal>
 
-<!-- Modal para subir documento Masivo -->
+
 <!-- Modal para subir documento Masivo -->
 <c-modal id="uploadModalMasivo" [visible]="uploadModalVisibleMasivo"
   (visibleChange)="handleUploadModalChangeMasivo($event)">
@@ -120,6 +122,7 @@
 </c-modal>
 
 <!-- Alert message for success or error (masivo) -->
-<div *ngIf="showAlert" class="alert" [ngClass]="{'alert-success': uploadMessageMasivo.includes('correctamente'), 'alert-danger': uploadMessageMasivo.includes('Error') }">
+<div *ngIf="showAlert" class="alert"
+  [ngClass]="{'alert-success': uploadMessageMasivo.includes('correctamente'), 'alert-danger': uploadMessageMasivo.includes('Error') }">
   {{ uploadMessageMasivo }}
 </div>

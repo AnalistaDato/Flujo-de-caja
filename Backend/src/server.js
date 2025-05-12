@@ -31,7 +31,7 @@ const corsOptions = {
 // Configuración de CORS
 app.use(cors()); // Esto permite todas las solicitudes de cualquier origen.
  // Preflight response for all routes
-
+ app.use(express.static(path.join(__dirname, 'public')));
 
 // Manejo del cuerpo de las solicitudes
 app.use(bodyParser.json());
@@ -43,11 +43,29 @@ require("./routes")(app);
 cron.schedule("0 0 * * *", () => {
   console.log("Ejecutando script Python a medianoche");
   runPythonScript();
+  runPythonScript_2();
 });
 
 // Función para ejecutar el script de Python
 function runPythonScript() {
   const scriptPath = path.join(__dirname, "Scripts", "script_7.py");
+
+  PythonShell.run(scriptPath, null, (err, result) => {
+    if (err) {
+      console.error(`Error ejecutando el script: ${err.message}`);
+      console.error("Detalles del error:", err);
+      return;
+    }
+    if (result) {
+      console.log("Resultado del script:", result.join("\n"));
+    } else {
+      console.log("No se recibió resultado del script.");
+    }
+  });
+}
+
+function runPythonScript_2() {
+  const scriptPath = path.join(__dirname, "Scripts", "script_8.py");
 
   PythonShell.run(scriptPath, null, (err, result) => {
     if (err) {

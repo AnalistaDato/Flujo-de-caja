@@ -123,7 +123,7 @@ def main(file_path):
                     "Impuestos con signo": "impuestos",
                     "Total con signo": "total",
                     "Total en divisa con signo": "total_en_divisa",
-                    "Importe adeudado con signo": "importe_adeudado",
+                    "Importe adeudado con signo": "importe_adeudado_sin_signo",
                     "Estado de pago": "estado_pago",
                     "Estado": "estado",
                 },
@@ -135,7 +135,7 @@ def main(file_path):
             current_time = datetime.now()
             df["created_at"] = current_time
             df["updated_at"] = current_time
-            df["estado_g"] = "activo"
+            df["estado_g"] = "A"
             df["tipo"] = "Faturado"
 
             table_name = "facturas"

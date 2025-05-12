@@ -1,0 +1,9 @@
+/* Aseguramos que el contenedor ocupe toda la altura */
+ .bg-light {
+    min-height: 100vh; /* Asegura que el contenedor ocupe toda la altura de la pantalla */
+    display: flex;
+    justify-content: center; /* Centra el contenido horizontalmente */
+    align-items: center; /* Centra el contenido verticalmente */
+  }
+  
+

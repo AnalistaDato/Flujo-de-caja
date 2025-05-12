@@ -1,0 +1,15 @@
+/* Ajustes para la tabla */
+.th-acciones, .td-acciones {
+  width: 100px; /* Ajusta el tamaño según sea necesario */
+  text-align: center;
+  white-space: nowrap; /* Evita que los botones se desborden */
+}
+
+.card {
+  max-height: 80vh;
+  overflow-y: auto; 
+}
+.table-responsive {
+  max-height: calc(80vh - 120px);
+  overflow-y: auto;
+}

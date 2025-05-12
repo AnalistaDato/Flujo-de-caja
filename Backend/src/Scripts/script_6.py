@@ -6,7 +6,6 @@ from db import get_engine
 # Establece la conexión a la base de datos
 engine = get_engine()
 
-
 def process_file(file_path):
     # Cargar el archivo dependiendo del formato (CSV o Excel)
     if file_path.endswith(".csv"):
@@ -19,30 +18,24 @@ def process_file(file_path):
     # Eliminar espacios en blanco de los nombres de las columnas
     df.columns = df.columns.str.strip()
 
-    # Asegurarse de que 'debito' y 'credito' sean de tipo string antes de eliminar comas
+    # Asegurarse de que 'debito' y 'credito' sean de tipo numérico
     df['debito'] = df['debito'].astype(str).str.replace(',', '').apply(pd.to_numeric, errors='coerce').fillna(0)
     df['credito'] = df['credito'].astype(str).str.replace(',', '').apply(pd.to_numeric, errors='coerce').fillna(0)
 
-    # Clasificar transacciones según las reglas de pasivo
-    df["tipo_transaccion"] = df.apply(
-        lambda row: "ingreso" if row["credito"] > 0 and row["debito"] == 0
-        else ("egreso" if row["debito"] > 0 and row["credito"] == 0 else "otro"),
-        axis=1,
-    )
-    
-    
+    # Asegurar que los débitos sean ingresos (positivos) y los créditos sean egresos (negativos)
+    df['debito'] = df['debito'].abs()  # Débitos siempre positivos
+    df['credito'] = -df['credito'].abs()  # Créditos siempre negativos
 
-    # Agregar la columna 'banco' con valor por defecto 'sin banco'
-    df['banco'] = 'sin banco'
+    # Clasificar transacciones según las reglas de pasivo
+    df["tipo_transaccion"] = 'proyectado'
+
+    # Asignar "ingreso" o "egreso" en la columna 'banco' según corresponda
+    df['banco'] = df.apply(lambda row: 'ingreso' if row['debito'] > 0 else ('egreso' if row['credito'] < 0 else 'sin banco'), axis=1)
 
     # Establecer un estado por defecto
     df["estado"] = "proyectado"
 
     return df
-
-
-
-
 
 def save_to_database(df, table_name):
     # Verifica si el DataFrame está vacío
@@ -59,7 +52,6 @@ def save_to_database(df, table_name):
     except Exception as e:
         print(f"Error al guardar en la base de datos: {e}")
 
-
 if __name__ == "__main__":
     # Obtiene la ruta del archivo desde la línea de comandos
     if len(sys.argv) < 2:
@@ -70,7 +62,7 @@ if __name__ == "__main__":
 
     # Procesa el archivo y guarda el DataFrame resultante
     df = process_file(file_path)
-
+    print(f"Procesando archivo: {file_path}")
     # Muestra información del DataFrame
     print("Contenido del DataFrame:")
     print(df.head())  # Muestra las primeras filas del DataFrame

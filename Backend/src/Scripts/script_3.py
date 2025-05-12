@@ -4,27 +4,103 @@ from datetime import datetime
 import sys
 import os
 from db import get_engine
-
+import re
 
 engine = get_engine()
 
 
 def process_file(file_path):
-    """Lee un archivo Excel o CSV y retorna un DataFrame con encabezados limpios."""
     if file_path.endswith(".csv"):
-        df = pd.read_csv(file_path, header=1)  # Leemos desde la segunda fila como encabezado
-        df = df.dropna(how='all')  # Eliminamos filas completamente vacías
+        df = pd.read_csv(file_path, header=1)
     elif file_path.endswith(".xlsx"):
-        df = pd.read_excel(file_path, header=1)  # Leemos desde la segunda fila como encabezado
-        df = df.dropna(how='all')  # Eliminamos filas completamente vacías
+        df = pd.read_excel(file_path, header=1)
     else:
         raise ValueError("Unsupported file type")
-    
-    # Filtramos cualquier fila que pueda contener "Saldo inicial"
+
+    df = df.drop([0, 0], axis=0).reset_index(drop=True)
     df = df[df["Unnamed: 0"] != "Saldo inicial"]
-    
-    print(f"Columnas en el archivo {file_path}: {df.columns}")
     return df
+
+def identify_company(file_path):
+    # Extraer el nombre del archivo sin la extensión
+    file_name = file_path.split("/")[-1].split(".")[0]
+    # Normalizar el nombre (minúsculas) y buscar patrones
+    normalized_name = file_name.lower()
+
+    # Buscar patrones para determinar la empresa
+    if re.search(r"services", normalized_name):
+        return "services"
+    elif re.search(r"privada", normalized_name):
+        return "privada"
+
+    return None
+
+def filter_accounts(df):
+    allowed_accounts = {
+        "cuenta_contable": [
+            "NACIONALES"
+            "JEEVES",
+            "BANCOLOMBIA 8986",
+            "BANCOLOMBIA 9918",
+            "BANCOLOMBIA ROTATIVO 0115",
+            "BANCOLOMBIA ROTATIVO 1053",
+            "BANCOLOMBIA 9404",
+            "BANCOLOMBIA 0353",
+            "CREDIPAGO VIRTUAL 3264",
+            "CESANTIAS 2023 0334",
+            "BANCOLOMBIA 3770",
+            "BANCOLOMBIA t. credito COP 4428",
+            "PROVEEDORES NACIONALES",
+            "INTERCOMPAÑIAS",
+            "GASTOS LEGALES",
+            "HONORARIOS",
+            "SERVICIOS TECNICOS",
+            "ARRENDAMIENTOS",
+            "TRANSPORTES, FLETES Y ACARREOS",
+            "SERVICIOS PUBLICOS",
+            "SEGUROS",
+            "SEGUROS (ASCENSION)",
+            "GASTOS DE VIAJE",
+            "CASINO Y RESTAURANTE",
+            "ELEMENTOS DE ASEO Y CAFETERIA",
+            "OTROS BIENES O SERVICIOS",
+            "EXAMENES DE INGRESO",
+            "LIQUIDACIONES POR PAGAR",
+            "CXP EDUARDO RODRIGUES",
+            "CXP MAURICIO HERNANDEZ",
+            "RTE FTE 2022",
+            "RTE FTE 2023",
+            "RTE FTE 2024",
+            "RTE ICA POR PAGAR 2017",
+            "RTE ICA POR PAGAR AÑOS ANTERIORES",
+            "RTE ICA POR PAGAR 2022",
+            "RTE ICA POR PAGAR 2023",
+            "RTE ICA POR PAGAR 2024",
+            "IMPUESTO DE RENTA Y COMPLEMENTARIOS 2019",
+            "IMPUESTO DE RENTA Y COMPLEMENTARIOS 2022",
+            "IMPUESTO DE RENTA Y COMPLEMENTARIOS 2023",
+            "IVA POR PAGAR 2019",
+            "IVA POR PAGAR 2020",
+            "IVA POR PAGAR 2021",
+            "IVA POR PAGAR 2022",
+            "ICA POR PAGAR 2023",
+            "ICA POR PAGAR 2024",
+            "ICA PERIODO ANTERIOR",
+            "APORTES EN LINEA",
+            "NOMINA POR PAGAR",
+            "CESANTIAS",
+            "INTERESES SOBRE CESANTIAS",
+            "PRIMA POR PAGAR",
+            "VACACIONES POR PAGAR",
+            "DE CLIENTES",
+        ]
+    }
+
+    # Filtramos el DataFrame según los detalles y cuentas permitidos
+    filtered_df = df[
+        df["cuenta_contable"].isin(allowed_accounts["cuenta_contable"])
+    ]
+    return filtered_df
 
 
 def validate_columns(df, required_columns):
@@ -37,21 +113,25 @@ def validate_columns(df, required_columns):
     return True
 
 def identif(df):
-    # Validar que las columnas 'Fecha', 'Unnamed: 0' y otras necesarias estén en el DataFrame
-    required_columns = ['Fecha', 'Unnamed: 0']
+    required_columns = ["Unnamed: 0", "Unnamed: 1"]
     if not validate_columns(df, required_columns):
-        return df  # Retorna el DataFrame original si las columnas están incompletas
+        return df
 
-    df["Es_cuenta_contable"] = df["Fecha"].isna() & df["Unnamed: 0"].notna()
+    df["Es_cuenta_contable"] = df["Unnamed: 1"].isna() & df["Unnamed: 0"].notna()
     df["Cuenta_contable"] = df["Unnamed: 0"].where(df["Es_cuenta_contable"]).ffill()
     facturas_df = df[~df["Es_cuenta_contable"]].copy()
+
+    # Separar cuenta y detalle
+    cuenta_detalle = facturas_df["Cuenta_contable"].str.split(" ", n=1, expand=True)
+    facturas_df["cuenta_contable"] = cuenta_detalle[1]
+
     return facturas_df
 
 
+
 def select(columns, names, df):
-    """Selecciona las columnas especificadas y renombra las columnas en el DataFrame."""
-    facturas_df = df[columns]  # Seleccionamos solo las columnas que nos interesan
-    facturas_df.columns = names  # Renombramos las columnas
+    facturas_df = df[columns]
+    facturas_df.columns = names
     return facturas_df
 
 
@@ -74,16 +154,24 @@ def process_and_store(df, table_name):
 
 
 def main(input_path):
+    
+    company = identify_company(input_path)
+    
+    if company is None:
+        print("El archivo no pertenece a 'services' ni 'privada'. No se procesará.")
+        return
     # Definir las columnas que queremos mantener y sus nuevos nombres
     columns = [
         "Unnamed: 0",  # Esta parece ser la columna de facturas
-        "Fecha",  # Columna de fechas
-        "Cuenta_contable",  # Columna creada en 'identif'
+        "Unnamed: 1",  # Columna de fechas
+        "cuenta_contable",
+        "empresa"
     ]
     names = [
         "factura",  # Renombramos 'Unnamed: 0' a 'factura'
-        "fecha",  # Renombramos 'Fecha' a 'fecha'
+        "fecha",  # Renombramos 'fecha' a 'fecha'
         "cuenta_contable",  # Ya está como 'Cuenta_contable', solo lo mantenemos
+        "empresa"
     ]
     
     table_name = "cuentas_contables"  # Cambiar esto si es necesario
@@ -91,6 +179,11 @@ def main(input_path):
     if os.path.isfile(input_path):  # Verifica si es un archivo
         df = process_file(input_path)
         df = identif(df)
+        df = filter_accounts(df)
+        df["empresa"] = identify_company(input_path)
+        df = df.drop_duplicates()  # Eliminar duplicados
+        print(df.columns)  # Para ver todas las columnas del DataFrame
+        print(df['empresa'].isnull().sum())  # Para contar valores nulos en la columna 'empresa'
         df = select(columns, names, df)  # Selecciona y renombra las columnas
         print("DataFrame después de seleccionar y renombrar columnas:")
         print(df)  # Aquí se imprime el DataFrame después de seleccionar y renombrar
@@ -102,6 +195,9 @@ def main(input_path):
                 file_path = os.path.join(input_path, filename)
                 df = process_file(file_path)
                 df = identif(df)
+                df = filter_accounts(df)
+                df["empresa"] = identify_company(input_path)
+                df = df.drop_duplicates()  # Eliminar duplicados
                 df = select(columns, names, df)  # Selecciona y renombra las columnas
                 print("DataFrame después de seleccionar y renombrar columnas:")
                 print(df)  # Aquí se imprime el DataFrame después de seleccionar y renombrar

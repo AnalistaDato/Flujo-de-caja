@@ -2,6 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const path = require("path");
 const { exec } = require("child_process");
+const authorize = require("../middleware/authorize"); // Middleware de autorización
 
 const router = express.Router();
 
@@ -33,7 +34,9 @@ const fileFilter = (_req, file, cb) => {
 const upload = multer({ storage, fileFilter });
 
 // Route to upload and process a file
-router.post("/upload", upload.single("file"), (req, res) => {
+router.post("/upload", upload.single("file"), 
+authorize("Admin", "Gerente"),
+(req, res) => {
   if (!req.file) {
     return res
       .status(400)

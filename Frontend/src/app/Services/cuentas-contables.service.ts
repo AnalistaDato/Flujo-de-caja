@@ -16,37 +16,45 @@ export class CuentasContablesService {
 
   private readonly UPLOAD_URL = `${environment.apiBaseUrl}/cuentas_contables`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-  // Generar encabezados con token de autorización
-  private getAuthHeaders(): HttpHeaders {
+  private getAuthHeaders(isMultipart = false): HttpHeaders {
     const token = localStorage.getItem('authToken');
     let headers = new HttpHeaders();
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
+    } else {
+      console.warn('⚠️ No se encontró el token en localStorage.');
     }
-    console.log('Encabezados generados:', headers);
+  
+    if (!isMultipart) {
+      headers = headers.set('Content-Type', 'application/json');
+    }
+  
     return headers;
   }
   
-
-  // Subir archivo al servidor
+  
+  // Subir archivo al servidor con el token de autorización
   uploadFile(file: File): Observable<any> {
+    console.log('Ejecutando uploadFile()'); // <-- Asegurar que la función se ejecuta
+  
     const formData: FormData = new FormData();
     formData.append('file', file, file.name);
   
-    const headers = this.getAuthHeaders(); // Asegúrate de obtener los encabezados
+    // Obtener los encabezados con el token sin establecer 'Content-Type'
+    const headers = this.getAuthHeaders(true);
   
-    // Usa HttpClient.post para simplificar
     return this.http.post(this.UPLOAD_URL, formData, {
       headers: headers,
       reportProgress: true,
-      observe: 'events', // Necesario para obtener los eventos como HttpEvent
+      observe: 'events',
     }).pipe(
       map(event => this.getEventMessage(event, file)),
       catchError(error => this.handleError(error, file))
     );
   }
+  
 
   // Obtener cuentas contables
   getCuentasContables(): Observable<cuentasContables[]> {
@@ -54,7 +62,7 @@ export class CuentasContablesService {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`,
     });
-  
+
     return this.http.get<cuentasContables[]>(this.UPLOAD_URL, { headers }).pipe(
       catchError(this.handleGetError)
     );

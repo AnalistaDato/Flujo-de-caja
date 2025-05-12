@@ -1,12 +1,11 @@
-import { Component, computed, DestroyRef, inject, Input } from '@angular/core';
+import { Component, computed, DestroyRef, inject, Input, OnInit } from '@angular/core';
 import {
   AvatarComponent,
-  BadgeComponent,
+  BadgeModule,
   BreadcrumbRouterComponent,
   ColorModeService,
   ContainerComponent,
   DropdownComponent,
-  DropdownDividerDirective,
   DropdownHeaderDirective,
   DropdownItemDirective,
   DropdownMenuDirective,
@@ -14,33 +13,46 @@ import {
   HeaderComponent,
   HeaderNavComponent,
   HeaderTogglerDirective,
-  NavItemComponent,
-  NavLinkDirective,
-  ProgressBarDirective,
-  ProgressComponent,
   SidebarToggleDirective,
   TextColorDirective,
-  ThemeDirective
+  ThemeDirective,
 } from '@coreui/angular';
-import { NgStyle, NgTemplateOutlet } from '@angular/common';
-import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
+import { CommonModule, NgTemplateOutlet } from '@angular/common';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { IconDirective } from '@coreui/icons-angular';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { delay, filter, map, tap } from 'rxjs/operators';
 import { AuthService } from '../../../Services/auth.service';
+import { NotificacionService } from 'app/Services/notificacion.service';
+import { FacturaProyectada, ProyectadosService } from 'app/Services/proyectados.service';
 
 @Component({
   selector: 'app-default-header',
   templateUrl: './default-header.component.html',
   standalone: true,
-  imports: [ContainerComponent, HeaderTogglerDirective, SidebarToggleDirective, IconDirective, HeaderNavComponent, NavItemComponent, NavLinkDirective, RouterLink, RouterLinkActive, NgTemplateOutlet, BreadcrumbRouterComponent, ThemeDirective, DropdownComponent, DropdownToggleDirective, TextColorDirective, AvatarComponent, DropdownMenuDirective, DropdownHeaderDirective, DropdownItemDirective, BadgeComponent, DropdownDividerDirective, ProgressBarDirective, ProgressComponent, NgStyle]
+  imports: [RouterLink,BadgeModule,ContainerComponent, HeaderTogglerDirective, SidebarToggleDirective, IconDirective, HeaderNavComponent, RouterLink, NgTemplateOutlet, BreadcrumbRouterComponent, ThemeDirective, DropdownComponent, DropdownToggleDirective, TextColorDirective, AvatarComponent, DropdownMenuDirective, DropdownHeaderDirective, DropdownItemDirective, CommonModule]
 })
-export class DefaultHeaderComponent extends HeaderComponent {
+export class DefaultHeaderComponent extends HeaderComponent implements OnInit{
 
   readonly #activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   readonly #colorModeService = inject(ColorModeService);
   readonly colorMode = this.#colorModeService.colorMode;
   readonly #destroyRef: DestroyRef = inject(DestroyRef);
+  readonly notificacionService = inject(NotificacionService);
+  readonly proyectadosService = inject(ProyectadosService);
+  notificaciones: any[] = [];
+  proyecciones: any[] = [];
+  data: FacturaProyectada[] = [];
+
+  ngOnInit(): void {
+    this.notificacionService.notificaciones$.subscribe(notificaciones => {
+      this.notificaciones = notificaciones;
+    });
+
+    this.proyectadosService.proyecciones$.subscribe(proyecciones => {
+      this.proyecciones = proyecciones;
+    });
+  }
 
   readonly colorModes = [
     { name: 'light', text: 'Light', icon: 'cilSun' },
@@ -53,7 +65,7 @@ export class DefaultHeaderComponent extends HeaderComponent {
     return this.colorModes.find(mode=> mode.name === currentMode)?.icon ?? 'cilSun';
   });
 
-  constructor(private AuthService: AuthService) {
+  constructor(private AuthService: AuthService, proyectadosServoce: ProyectadosService) {
     super();
     this.#colorModeService.localStorageItemName.set('coreui-free-angular-admin-template-theme-default');
     this.#colorModeService.eventName.set('ColorSchemeChange');
@@ -74,7 +86,27 @@ export class DefaultHeaderComponent extends HeaderComponent {
     this.AuthService.logout()
   }
 
+  getRowDataId(event: any): number {
+    const id = event.currentTarget.getAttribute('data-id');
+    return parseInt(id, 10) || -1; // Default value if 'id' not found
+  }
 
+  onInactivate(id: number): void {
+    if (id !== -1) {
+      const confirmed = window.confirm('¿Estás seguro de que deseas inactivar este registro? Esta acción no se puede deshacer.');
+
+      if (confirmed) {
+        this.proyectadosService.inactivateRecord(id).subscribe({
+          next: (response) => {
+            console.log('Factura inactivada con éxito:', response.message);
+          },
+          error: (error) => {
+            console.error('Error al inactivar la factura:', error);
+          }
+        });
+      }
+    }
+  }
 
   @Input() sidebarId: string = 'sidebar1';
 

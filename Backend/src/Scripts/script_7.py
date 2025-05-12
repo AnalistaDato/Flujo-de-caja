@@ -17,18 +17,19 @@ def fetch_data_from_db(empresa, banco, engine):
         query = f"""
         SELECT fecha, COALESCE(fecha_reprogramacion, fecha) AS fecha_uso, credito, debito, tipo_transaccion
         FROM facturas_consolidadas
-        WHERE empresa = '{empresa}' AND banco = '{banco}'
+        WHERE empresa = '{empresa}' AND banco = '{banco}' AND estado != 'proyectado'
         ORDER BY fecha_uso
         """
     else:
         query = f"""
         SELECT fecha AS fecha_uso, credito, debito, tipo_transaccion
         FROM facturas_consolidadas
-        WHERE empresa = '{empresa}' AND banco = '{banco}'
+        WHERE empresa = '{empresa}' AND banco = '{banco}' AND estado != 'proyectado'
         ORDER BY fecha
         """
 
     return pd.read_sql(query, engine)
+
 
 # Generar columna de fecha efectiva
 def determine_effective_date(df):
@@ -62,15 +63,22 @@ def check_balance_exists(engine, fecha, empresa, banco, transaction_type):
 
 
 # Insertar saldos iniciales y finales
-def insert_balance(engine, fecha, amount, empresa, banco,transaction_type):
+def insert_balance(engine, fecha, amount, empresa, banco, transaction_type):
     query = text(
         """
-        INSERT INTO facturas_consolidadas (socio, fecha, credito, debito, empresa, banco, tipo_transaccion)
+        INSERT INTO facturas_consolidadas 
+            (socio, fecha, credito, debito, empresa, banco, tipo_transaccion)
         VALUES (:socio, :fecha, :credito, :debito, :empresa, :banco, :tipo_transaccion)
-    """
+        """
     )
-    credito = max(amount, 0)
-    debito = max(-amount, 0)
+    # Si el monto es negativo, se registra en la columna "credito" (ya es negativo).
+    # Si el monto es positivo, se registra en la columna "debito".
+    if amount < 0:
+        credito = amount  # ya es negativo
+        debito = 0
+    else:
+        credito = 0
+        debito = amount
 
     with engine.connect() as conn:
         transaction = conn.begin()
@@ -88,9 +96,7 @@ def insert_balance(engine, fecha, amount, empresa, banco,transaction_type):
                 },
             )
             transaction.commit()
-            print(
-                f"Inserted {transaction_type} for {empresa}, {banco} on {fecha}: {amount}"
-            )
+            print(f"Inserted {transaction_type} for {empresa}, {banco} on {fecha}: {amount}")
         except Exception as e:
             transaction.rollback()
             print(f"Error inserting balance: {e}")
@@ -114,16 +120,17 @@ def generate_final_balance(engine, fecha, empresa, banco):
     """
     result = pd.read_sql(query, engine)
     
-    total_credito = result["total_credito"].iloc[0]
-    total_debito = result["total_debito"].iloc[0]
+    # Usamos 0 si el resultado es None
+    total_credito = result["total_credito"].iloc[0] or 0
+    total_debito = result["total_debito"].iloc[0] or 0
     
     print(f"Credito {total_credito}, Debito {total_debito}")
 
-    # Calcular el saldo final
-    saldo_final = total_credito - total_debito
+    # Con la nueva convención: final = total_debito + total_credito,
+    # recordando que los créditos ya son negativos.
+    saldo_final = total_debito + total_credito
 
-
-    # Verificar si ya existe un saldo final para esa fecha, empresa y banco
+    # Insertamos el saldo final si aún no existe
     if not check_balance_exists(engine, fecha, empresa, banco, "SALDO FINAL"):
         insert_balance(engine, fecha, saldo_final, empresa, banco, "SALDO FINAL")
 

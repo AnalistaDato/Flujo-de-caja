@@ -1,42 +1,36 @@
-<div class='demo-app'>
-  <div class='demo-app-sidebar'>
-    <div class='demo-app-sidebar-section'>
-      <label>
-        <input
-          type='checkbox'
-          [checked]='calendarOptions().weekends'
-          (change)='handleWeekendsToggle()' />
-        Mostrar fines de semana
-      </label>
-    </div>
 
-
-    <div class='demo-app-main'>
-      <full-calendar *ngIf='calendarVisible()' [options]='calendarOptions()'>
-        <ng-template  #eventContent let-arg>
-          <div [ngStyle]="{
-                'background-color': arg.event.backgroundColor,
-                'border-color': arg.event.borderColor,
-                'border-style': 'solid',
-                'padding': '5px',
-                'border-radius': '4px',
-                'color': '#000'
-              }">
-              
-            <div>{{ arg.event.title }}</div>
-            <div style="font-size: small;">
-              <span><i>{{ arg.event.extendedProps['status']
-                  }}</i></span>
-              <span *ngIf="arg.event.extendedProps['description']">
-                <br />{{ arg.event.extendedProps['description'] }}
-              </span>
+        <label>
+          <input
+            type='checkbox'
+            [checked]='calendarOptions().weekends'
+            (change)='handleWeekendsToggle()' />
+          Mostrar fines de semana
+        </label>
+      
+        <full-calendar *ngIf='calendarVisible()' [options]='calendarOptions()'>
+          <ng-template  #eventContent let-arg>
+          
+            <div [ngStyle]="{
+                  'background-color': arg.event.backgroundColor,
+                  'border-color': arg.event.borderColor,
+                  'border-style': 'solid',
+                  'padding': '5px',
+                  'border-radius': '4px',
+                  'color': '#000'
+                }">
+                
+              <div>{{ arg.event.title }}</div>
+              <div style="font-size: small;">
+                <span><i>{{ arg.event.extendedProps['status']
+                    }}</i></span>
+                <span *ngIf="arg.event.extendedProps['description']">
+                  <br />{{ arg.event.extendedProps['description'] }}
+                </span>
+              </div>
             </div>
-          </div>
-        </ng-template>
-      </full-calendar>
-    </div>
-  </div>
-</div>
+          </ng-template>
+        </full-calendar>
+      
 
 <!-- Modal para agregar registro -->
 <c-modal id="addRecordModal" [visible]="addRecordModalVisible"
